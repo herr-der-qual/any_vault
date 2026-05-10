@@ -12,8 +12,14 @@ export default defineConfig({
     },
 
     server: {
-        port: 3020,
+        port: Number(process.env.PORT ?? 3020),
         open: true,
+        proxy: {
+            '/api': {
+                target: process.env.HTTP_PROXY ?? 'http://localhost:8000',
+                changeOrigin: true,
+            },
+        },
     },
 
     build: {
