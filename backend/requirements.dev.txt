@@ -1,0 +1,5 @@
+-r requirements.txt
+model-bakery==1.21.0
+django-extensions==3.2.3
+django_wait_for_db
+setuptools==58.1.0
