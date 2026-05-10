@@ -1,37 +1,32 @@
 from django.contrib import admin
 
+from .models.brand import Brand
 from .models.category import Category
-from .models.product import Product
 from .models.flavor import Flavor
-from .models.user import User, UserGroup
+from .models.product import Product
 from .models.rating import Rating
 from .models.comment import Comment
 
 
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'user')
+    list_select_related = ('user',)
+    search_fields = ('name', 'user__email')
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-    search_fields = ('name',)
+    list_display = ('id', 'name', 'user')
+    list_select_related = ('user',)
+    search_fields = ('name', 'user__email')
 
 
 @admin.register(Flavor)
 class FlavorAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-    search_fields = ('name',)
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'telegram_id', 'username', 'role')
-    search_fields = ('telegram_id', 'username')
-    list_filter = ('role',)
-
-
-@admin.register(UserGroup)
-class UserGroupAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-    search_fields = ('name',)
-    filter_horizontal = ('members',)
+    list_display = ('id', 'name', 'user')
+    list_select_related = ('user',)
+    search_fields = ('name', 'user__email')
 
 
 class RatingInline(admin.TabularInline):
@@ -46,10 +41,10 @@ class CommentInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'category', 'variant', 'user')
-    list_select_related = ('category', 'user')
-    list_filter = ('category', 'flavors', 'groups')
-    search_fields = ('variant', 'category__name', 'user__telegram_id', 'user__username')
+    list_display = ('id', 'category', 'brand', 'variant', 'user')
+    list_select_related = ('category', 'brand', 'user')
+    list_filter = ('category', 'brand', 'flavors', 'groups')
+    search_fields = ('variant', 'category__name', 'brand__name', 'user__email')
     filter_horizontal = ('flavors', 'groups')
     inlines = [RatingInline, CommentInline]
 
@@ -59,11 +54,11 @@ class RatingAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'user', 'value')
     list_select_related = ('product', 'user')
     list_filter = ('value', 'product__category')
-    search_fields = ('user__telegram_id', 'user__username', 'product__variant')
+    search_fields = ('user__email', 'product__variant')
 
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'user', 'text')
     list_select_related = ('product', 'user')
-    search_fields = ('text', 'user__telegram_id', 'user__username', 'product__variant')
+    search_fields = ('text', 'user__email', 'product__variant')

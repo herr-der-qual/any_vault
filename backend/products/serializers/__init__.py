@@ -1,11 +1,13 @@
 from .user import UserSerializer
 from .rating import RatingSerializer, RatingCreateUpdateSerializer
 from .comment import CommentSerializer, CommentCreateSerializer
-from .product import ProductDetailSerializer, ProductSerializer
+from .product import ProductSerializer, ProductCreateSerializer, ProductListSerializer
+from .catalog import BrandSerializer, CategorySerializer, FlavorSerializer
 
 __all__ = [
     'UserSerializer',
     'RatingSerializer', 'RatingCreateUpdateSerializer',
     'CommentSerializer', 'CommentCreateSerializer',
-    'ProductDetailSerializer', 'ProductSerializer',
+    'ProductSerializer', 'ProductCreateSerializer', 'ProductListSerializer',
+    'BrandSerializer', 'CategorySerializer', 'FlavorSerializer',
 ]

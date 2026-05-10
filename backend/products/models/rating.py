@@ -2,14 +2,14 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from products.models.product import Product
-from products.models.user import User
+from users.models import User
 
 
 class Rating(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ratings')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings')
     value = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
 
     class Meta:

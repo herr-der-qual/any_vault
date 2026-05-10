@@ -1,10 +1,15 @@
-from django.urls import path
-from .views.products import ProductView, ProductRatingView, ProductCommentView
+from rest_framework.routers import DefaultRouter
+from .views import (
+    ProductViewSet, RatingViewSet, CommentViewSet,
+    BrandViewSet, CategoryViewSet, FlavorViewSet,
+)
 
-urlpatterns = [
-    path('products/', ProductView.as_view(), name='product-list'),
-    path('products/<int:product_id>/', ProductView.as_view(), name='product-detail'),
-    path('products/ratings/', ProductRatingView.as_view(), name='product-rating'),
-    path('products/comments/', ProductCommentView.as_view(), name='product-comment'),
-]
+router = DefaultRouter()
+router.register('products', ProductViewSet, basename='product')
+router.register('ratings', RatingViewSet, basename='rating')
+router.register('comments', CommentViewSet, basename='comment')
+router.register('brands', BrandViewSet, basename='brand')
+router.register('categories', CategoryViewSet, basename='category')
+router.register('flavors', FlavorViewSet, basename='flavor')
 
+urlpatterns = router.urls

@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     'products',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +91,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.User'
 
 # DRF configuration: force JSON for API responses under /api/*
 REST_FRAMEWORK = {

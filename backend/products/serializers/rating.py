@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from ..models.rating import Rating
 from ..models.product import Product
-from ..models.user import User
+from users.models import User
 from .user import UserSerializer
 
 

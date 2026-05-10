@@ -1,7 +1,7 @@
 from django.db import models
 
 from products.models.product import Product
-from products.models.user import User
+from users.models import User
 
 
 class Comment(models.Model):
