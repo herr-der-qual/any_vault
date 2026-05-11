@@ -58,7 +58,7 @@ class ProductCreateTestCase(APITestCase):
 
         response = self.client.post(self.url, self.data, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create__missing_category__returns_400(self):
         data = {**self.data}

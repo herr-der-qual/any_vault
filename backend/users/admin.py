@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, UserGroup, GroupMembership
+from .models import User, UserGroup, GroupMembership, GroupInvite
 
 
 @admin.register(User)
@@ -46,3 +46,11 @@ class GroupMembershipAdmin(admin.ModelAdmin):
     list_filter = ('role', 'group')
     search_fields = ('user__email', 'group__name')
     readonly_fields = ('joined_at', 'updated_at')
+
+
+@admin.register(GroupInvite)
+class GroupInviteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'invite_type', 'email', 'group', 'role', 'invited_by', 'used', 'revoked', 'created_at')
+    list_filter = ('invite_type', 'role', 'used', 'revoked', 'group')
+    search_fields = ('email', 'group__name', 'invited_by__email')
+    readonly_fields = ('token', 'bulk_id', 'used_at', 'created_at')

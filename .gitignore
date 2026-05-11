@@ -4,3 +4,4 @@
 /.env
 /.env
 /.claude/
+/backend/users/migrations/

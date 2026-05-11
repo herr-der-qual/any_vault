@@ -1,5 +1,8 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -65,3 +68,38 @@ class GroupMembership(models.Model):
         if not self.pk and not self.group.memberships.exists():
             self.role = 'admin'
         super().save(*args, **kwargs)
+
+
+class GroupInvite(models.Model):
+    INVITE_TYPE_CHOICES = (
+        ('email', 'Email'),
+        ('bulk', 'Bulk'),
+        ('qr', 'QR'),
+    )
+
+    email = models.EmailField(blank=True)
+    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE, related_name='invites')
+    role = models.CharField(max_length=20, choices=GroupMembership.ROLE_CHOICES, default='view_only')
+    invited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sent_invites')
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    invite_type = models.CharField(max_length=10, choices=INVITE_TYPE_CHOICES, default='email')
+    expires_at = models.DateTimeField(null=True, blank=True)
+    used = models.BooleanField(default=False)
+    used_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='used_invites')
+    used_at = models.DateTimeField(null=True, blank=True)
+    bulk_id = models.UUIDField(null=True, blank=True, db_index=True)
+    revoked = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.invite_type} invite to {self.group.name} ({self.token})"
+
+    def is_valid(self):
+        if self.used or self.revoked:
+            return False
+        if self.expires_at and self.expires_at < timezone.now():
+            return False
+        return True
