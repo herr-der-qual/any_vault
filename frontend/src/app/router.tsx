@@ -1,6 +1,8 @@
 import {createBrowserRouter} from 'react-router-dom'
 import {LoginPage} from '@/pages/login'
 import {HomePage} from '@/pages/home'
+import {SettingsPage} from '@/pages/settings'
+import {MainLayout} from '@/widgets/main-layout'
 import {ProtectedRoute} from './ProtectedRoute'
 
 export const router = createBrowserRouter([
@@ -8,7 +10,13 @@ export const router = createBrowserRouter([
     {
         element: <ProtectedRoute/>,
         children: [
-            {path: '/', element: <HomePage/>},
+            {
+                element: <MainLayout/>,
+                children: [
+                    {path: '/', element: <HomePage/>},
+                    {path: '/settings', element: <SettingsPage/>},
+                ],
+            },
         ],
     },
 ])
