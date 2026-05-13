@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
 from ..models.product import Product
+from ..models.rating import Rating
+from ..models.comment import Comment
+from ..models.brand import Brand
+from ..models.category import Category
+from ..models.flavor import Flavor
+from users.models import UserGroup
 from .rating import RatingSerializer
 from .comment import CommentSerializer
 
@@ -28,10 +34,23 @@ class ProductListSerializer(serializers.ModelSerializer):
         fields = ['id', 'category', 'brand', 'variant', 'flavors', 'image']
 
 
+class RatingInputSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    value = serializers.IntegerField(min_value=1, max_value=10, allow_null=True, required=False)
+
+
+class CommentInputSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    text = serializers.CharField(allow_blank=True, default='')
+
+
 class ProductCreateSerializer(serializers.ModelSerializer):
+    ratings = RatingInputSerializer(many=True, required=False, write_only=True)
+    comments = CommentInputSerializer(many=True, required=False, write_only=True)
+
     class Meta:
         model = Product
-        fields = ['id', 'category', 'brand', 'variant', 'flavors', 'groups', 'description', 'image']
+        fields = ['id', 'category', 'brand', 'variant', 'flavors', 'groups', 'description', 'image', 'ratings', 'comments']
         extra_kwargs = {
             'flavors': {'required': False},
             'groups': {'required': False},
@@ -40,12 +59,24 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         flavors = validated_data.pop('flavors', [])
         groups = validated_data.pop('groups', [])
+        ratings_data = validated_data.pop('ratings', [])
+        comments_data = validated_data.pop('comments', [])
+
         product = Product.objects.create(user=self.context['request'].user, **validated_data)
         product.flavors.set(flavors)
         product.groups.set(groups)
+
+        for r in ratings_data:
+            if r.get('value') is not None:
+                Rating.objects.create(product=product, user_id=r['user_id'], value=r['value'])
+
+        for c in comments_data:
+            if c.get('text', '').strip():
+                Comment.objects.create(product=product, user_id=c['user_id'], text=c['text'])
+
         return product
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data):  # noqa: used by ModelViewSet
         flavors = validated_data.pop('flavors', None)
         groups = validated_data.pop('groups', None)
         if flavors is not None:
@@ -53,3 +84,18 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         if groups is not None:
             instance.groups.set(groups)
         return super().update(instance, validated_data)
+
+
+class BulkEntrySerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    rating = serializers.IntegerField(min_value=1, max_value=10, allow_null=True, required=False)
+    comment = serializers.CharField(allow_blank=True, default='')
+
+
+class BulkProductCreateSerializer(serializers.Serializer):
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), required=False, allow_null=True)
+    variant = serializers.CharField(max_length=64, allow_blank=True, default='')
+    flavors = serializers.PrimaryKeyRelatedField(queryset=Flavor.objects.all(), many=True, required=False)
+    groups = serializers.PrimaryKeyRelatedField(queryset=UserGroup.objects.all(), many=True, required=False)
+    entries = BulkEntrySerializer(many=True, min_length=1)

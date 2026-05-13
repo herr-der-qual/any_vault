@@ -3,7 +3,11 @@ import {HomeOutlined, Add, SettingsOutlined} from '@mui/icons-material'
 import clsx from 'clsx'
 import styles from './TabBar.module.scss'
 
-export function TabBar() {
+interface Props {
+    onAddClick: () => void
+}
+
+export function TabBar({onAddClick}: Props) {
     return (
         <nav className={styles.tabBar}>
             <NavLink
@@ -14,7 +18,7 @@ export function TabBar() {
                 <HomeOutlined/>
             </NavLink>
 
-            <button type='button' className={clsx(styles.tab, styles.addButton)}>
+            <button type='button' className={clsx(styles.tab, styles.addButton)} onClick={onAddClick}>
                 <Add/>
             </button>
 

@@ -76,7 +76,10 @@ class GroupMembersView(APIView):
         get_object_or_404(UserGroup, id=group_id)
         memberships = GroupMembership.objects.filter(group_id=group_id).select_related('user')
         data = [
-            {'user_id': m.user.id, 'email': m.user.email, 'username': m.user.username, 'role': m.role}
+            {
+                'user_id': m.user.id, 'email': m.user.email, 'username': m.user.username,
+                'first_name': m.user.first_name, 'last_name': m.user.last_name, 'role': m.role,
+            }
             for m in memberships
         ]
         return Response(data)

@@ -8,7 +8,7 @@ class Brand(models.Model):
         unique_together = ['name', 'user']
         ordering = ['name']
 
-    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     name = models.CharField(unique=True, max_length=32)
 
     def __str__(self):

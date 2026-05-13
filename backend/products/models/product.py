@@ -9,7 +9,6 @@ from .flavor import Flavor
 class Product(models.Model):
     class Meta:
         ordering = ['variant']
-        unique_together = ['variant', 'brand', 'user']
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, related_name='products', null=True, blank=True)
