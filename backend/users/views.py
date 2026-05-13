@@ -23,12 +23,40 @@ from .serializers import (
 )
 
 
+class MyGroupsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        memberships = GroupMembership.objects.filter(user=request.user).select_related('group')
+        data = [{'id': m.group.id, 'name': m.group.name, 'role': m.role} for m in memberships]
+        return Response(data)
+
+    def post(self, request):
+        name = str(request.data.get('name', '')).strip()
+        if not name:
+            return Response({'name': ['This field is required.']}, status=400)
+        if UserGroup.objects.filter(name=name).exists():
+            return Response({'name': ['A group with this name already exists.']}, status=400)
+        group = UserGroup.objects.create(
+            name=name,
+            description=str(request.data.get('description', '')).strip(),
+        )
+        GroupMembership.objects.create(user=request.user, group=group, role='admin')
+        return Response({'id': group.id, 'name': group.name, 'role': 'admin'}, status=201)
+
+
 class MeView(RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         return self.request.user
+
+
+class GroupMemberPermission(BasePermission):
+    def has_permission(self, request, view):
+        group_id = view.kwargs.get('group_id')
+        return GroupMembership.objects.filter(user=request.user, group_id=group_id).exists()
 
 
 class GroupAdminPermission(BasePermission):
@@ -39,6 +67,32 @@ class GroupAdminPermission(BasePermission):
             return membership.can_manage_group()
         except GroupMembership.DoesNotExist:
             return False
+
+
+class GroupMembersView(APIView):
+    permission_classes = [IsAuthenticated, GroupMemberPermission]
+
+    def get(self, request, group_id):
+        get_object_or_404(UserGroup, id=group_id)
+        memberships = GroupMembership.objects.filter(group_id=group_id).select_related('user')
+        data = [
+            {'user_id': m.user.id, 'email': m.user.email, 'username': m.user.username, 'role': m.role}
+            for m in memberships
+        ]
+        return Response(data)
+
+
+class GroupMemberRoleView(APIView):
+    permission_classes = [IsAuthenticated, GroupAdminPermission]
+
+    def patch(self, request, group_id, user_id):
+        membership = get_object_or_404(GroupMembership, group_id=group_id, user_id=user_id)
+        role = request.data.get('role')
+        if role not in dict(GroupMembership.ROLE_CHOICES):
+            return Response({'role': ['Invalid role.']}, status=400)
+        membership.role = role
+        membership.save(update_fields=['role'])
+        return Response({'user_id': user_id, 'role': role})
 
 
 class GroupInviteListView(APIView):

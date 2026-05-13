@@ -43,4 +43,5 @@ client.interceptors.response.use(
 export const apiClient = {
     get: <T>(path: string) => client.get<T>(path).then(response => response.data),
     post: <T>(path: string, body: unknown) => client.post<T>(path, body).then(response => response.data),
+    patch: <T>(path: string, body: unknown) => client.patch<T>(path, body).then(response => response.data),
 }

@@ -5,14 +5,21 @@ from .views import (
     GroupEmailInviteView,
     GroupInviteListView,
     GroupInviteRevokeView,
+    GroupMemberRoleView,
+    GroupMembersView,
     GroupQrImageView,
     GroupQrInviteView,
     JoinView,
     MeView,
+    MyGroupsView,
 )
 
 urlpatterns = [
     path('me/', MeView.as_view(), name='user-me'),
+    path('groups/', MyGroupsView.as_view(), name='my-groups'),
+
+    path('groups/<int:group_id>/members/', GroupMembersView.as_view(), name='group-members'),
+    path('groups/<int:group_id>/members/<int:user_id>/', GroupMemberRoleView.as_view(), name='group-member-role'),
 
     path('groups/<int:group_id>/invites/', GroupInviteListView.as_view(), name='group-invite-list'),
     path('groups/<int:group_id>/invites/email/', GroupEmailInviteView.as_view(), name='group-invite-email'),

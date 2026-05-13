@@ -1,3 +1,48 @@
 .page {
     padding: 32px;
 }
+
+.section {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.groupCard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.groupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.memberList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.memberRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.roleLabel {
+    color: #757575;
+}
