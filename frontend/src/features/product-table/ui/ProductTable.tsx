@@ -24,7 +24,7 @@ import {CommentCell} from './CommentCell'
 import {ColumnSettingsPanel} from './ColumnSettingsPanel'
 import {SortSettingsPanel} from './SortSettingsPanel'
 import {FilterPanel} from './FilterPanel'
-import {ProductEditDialog} from './ProductEditDialog'
+import {ProductDialog} from './ProductDialog'
 import styles from './ProductTable.module.scss'
 
 interface Props {
@@ -386,7 +386,9 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
                 onDeleted={onViewDeleted}
             />
             {editingProduct && (
-                <ProductEditDialog
+                <ProductDialog
+                    mode='edit'
+                    open
                     product={editingProduct}
                     memberNames={memberNames}
                     canEditOthers={canEditOthers}

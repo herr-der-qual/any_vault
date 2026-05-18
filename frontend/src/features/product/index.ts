@@ -1,1 +1,1 @@
-export {CreateProductFlow} from './ui/CreateProductFlow'
+export {ProductDialog} from '@/features/product-table'

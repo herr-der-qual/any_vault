@@ -53,37 +53,6 @@
     margin-bottom: 4px;
 }
 
-.ratingButtons {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-}
-
-.rateBtn {
-    aspect-ratio: 1;
-    background: none;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: #212121;
-
-    &:hover {
-        background-color: #f5f5f5;
-    }
-}
-
-.rateBtnSelected {
-    background-color: #1976d2;
-    border-color: #1976d2;
-    color: #fff;
-
-    &:hover {
-        background-color: #1565c0;
-    }
-}
-
 .commentField {
     margin-top: 4px;
 }
