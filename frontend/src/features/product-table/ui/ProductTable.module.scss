@@ -89,6 +89,14 @@
     width: 200px;
 }
 
+.searchFieldEmpty .clearAdornment {
+    visibility: hidden;
+}
+
+.clearAdornment {
+    // referenced by searchFieldEmpty selector
+}
+
 .panel {
     width: 300px;
     max-width: 100vw;

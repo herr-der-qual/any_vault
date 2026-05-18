@@ -1,4 +1,5 @@
-import {useState, useMemo} from 'react'
+import {useState, useMemo, useCallback, useRef} from 'react'
+import type React from 'react'
 import {
     useReactTable, getCoreRowModel, flexRender,
     type ColumnDef,
@@ -174,6 +175,34 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
         return role === 'admin' || role === 'moderator'
     }, [groups, view.group])
 
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }, [setSearch])
+
+    const searchInputRef = useRef<HTMLInputElement>(null)
+
+    const handleClearSearch = useCallback(() => {
+        setSearch('')
+        searchInputRef.current?.focus()
+    }, [setSearch])
+
+    const searchSlotProps = useMemo(() => ({
+        input: {
+            startAdornment: (
+                <InputAdornment position='start'>
+                    <SearchIcon fontSize='small'/>
+                </InputAdornment>
+            ),
+            endAdornment: (
+                <InputAdornment position='end' className={styles.clearAdornment}>
+                    <IconButton size='small' onClick={handleClearSearch}>
+                        <ClearIcon fontSize='small'/>
+                    </IconButton>
+                </InputAdornment>
+            ),
+        },
+    }), [handleClearSearch])
+
     const visibleColumns = viewConfig.columns.filter(c => c.visible)
 
     const sortFields = useMemo(() => [
@@ -245,24 +274,10 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
                     size='small'
                     placeholder='Search...'
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    slotProps={{input: {
-                        startAdornment:
-                            <InputAdornment position='start'>
-                                <SearchIcon fontSize='small'/>
-                            </InputAdornment>,
-                        endAdornment: search && (
-                            <InputAdornment position='end'>
-                                <IconButton
-                                    size='small'
-                                    onClick={() => setSearch('')}
-                                >
-                                    <ClearIcon fontSize='small'/>
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}}
-                    className={styles.searchField}
+                    onChange={handleSearchChange}
+                    slotProps={searchSlotProps}
+                    inputRef={searchInputRef}
+                    className={`${styles.searchField} ${search ? '' : styles.searchFieldEmpty}`}
                 />
                 <div className={styles.spacer}/>
                 {isDirty && (
