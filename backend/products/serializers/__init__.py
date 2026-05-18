@@ -6,6 +6,7 @@ from .product import (
     BulkProductCreateSerializer,
 )
 from .catalog import BrandSerializer, CategorySerializer, FlavorSerializer
+from .table_view import TableViewSerializer
 
 __all__ = [
     'UserSerializer',
@@ -14,4 +15,5 @@ __all__ = [
     'ProductSerializer', 'ProductCreateSerializer', 'ProductListSerializer',
     'BrandSerializer', 'CategorySerializer', 'FlavorSerializer',
     'BulkProductCreateSerializer',
+    'TableViewSerializer',
 ]

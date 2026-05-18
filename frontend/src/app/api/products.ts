@@ -15,6 +15,36 @@ export interface BulkCreateProductPayload {
     entries: BulkEntry[]
 }
 
+export interface ProductRating {
+    user_id: number
+    value: number
+}
+
+export interface ProductComment {
+    user_id: number
+    text: string
+}
+
+export interface ProductRow {
+    id: number
+    category: string
+    brand: string | null
+    variant: string
+    flavors: string[]
+    ratings: ProductRating[]
+    comments: ProductComment[]
+    image: string | null
+}
+
+export interface ProductsResponse {
+    results: ProductRow[]
+    count: number
+}
+
 export function createProductBulk(payload: BulkCreateProductPayload) {
     return apiClient.post<{id: number; user_id: number}[]>('/products/bulk/', payload)
+}
+
+export function getProducts(params: Record<string, string | number | boolean | undefined>) {
+    return apiClient.get<ProductsResponse>('/products/', params)
 }

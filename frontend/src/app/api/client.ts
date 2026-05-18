@@ -41,7 +41,9 @@ client.interceptors.response.use(
 )
 
 export const apiClient = {
-    get: <T>(path: string) => client.get<T>(path).then(response => response.data),
+    get: <T>(path: string, params?: Record<string, string | number | boolean | undefined>) =>
+        client.get<T>(path, {params}).then(response => response.data),
     post: <T>(path: string, body: unknown) => client.post<T>(path, body).then(response => response.data),
     patch: <T>(path: string, body: unknown) => client.patch<T>(path, body).then(response => response.data),
+    delete: (path: string) => client.delete(path).then(response => response.data),
 }

@@ -1,4 +1,5 @@
 import {Button, TextField, Typography} from '@mui/material'
+import {TipButton} from '@/shared/ui/TipButton'
 import styles from './VariantStep.module.scss'
 
 interface Props {
@@ -7,12 +8,25 @@ interface Props {
     onNext: () => void
 }
 
+const TIP = 'Variant is the specific version or flavour of a product. ' +
+    'For example: Monster Energy → Ultra Paradise, Coca-Cola → Zero, Red Bull → Sugar Free. ' +
+    'Leave blank if the product has only one version.'
+
 export function VariantStep({value, onChange, onNext}: Props) {
     return (
         <div className={styles.container}>
-            <Typography variant='body2' color='text.secondary' className={styles.label}>
-                Variant
-            </Typography>
+            <div className={styles.labelRow}>
+                <Typography
+                    variant='body2'
+                    color='text.secondary'
+                >
+                    Variant
+                </Typography>
+                <TipButton
+                    title='What is a variant?'
+                    description={TIP}
+                />
+            </div>
             <TextField
                 autoFocus
                 fullWidth
@@ -20,7 +34,11 @@ export function VariantStep({value, onChange, onNext}: Props) {
                 onChange={event => onChange(event.target.value)}
                 onKeyDown={event => { if (event.key === 'Enter') onNext() }}
             />
-            <Button variant='contained' onClick={onNext} className={styles.button}>
+            <Button
+                variant='contained'
+                onClick={onNext}
+                className={styles.button}
+            >
                 Next
             </Button>
         </div>

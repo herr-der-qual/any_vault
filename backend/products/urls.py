@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ProductViewSet, RatingViewSet, CommentViewSet,
     BrandViewSet, CategoryViewSet, FlavorViewSet,
-    BulkProductCreateView,
+    BulkProductCreateView, TableViewViewSet,
 )
 
 router = DefaultRouter()
@@ -13,6 +13,7 @@ router.register('comments', CommentViewSet, basename='comment')
 router.register('brands', BrandViewSet, basename='brand')
 router.register('categories', CategoryViewSet, basename='category')
 router.register('flavors', FlavorViewSet, basename='flavor')
+router.register('table-views', TableViewViewSet, basename='tableview')
 
 urlpatterns = [
     path('products/bulk/', BulkProductCreateView.as_view()),

@@ -28,10 +28,18 @@ class ProductListSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField()
     brand = serializers.StringRelatedField()
     flavors = serializers.StringRelatedField(many=True)
+    ratings = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
+
+    def get_ratings(self, obj):
+        return [{'user_id': r.user_id, 'value': r.value} for r in obj.ratings.all()]
+
+    def get_comments(self, obj):
+        return [{'user_id': c.user_id, 'text': c.text} for c in obj.comments.all()]
 
     class Meta:
         model = Product
-        fields = ['id', 'category', 'brand', 'variant', 'flavors', 'image']
+        fields = ['id', 'category', 'brand', 'variant', 'flavors', 'ratings', 'comments', 'image']
 
 
 class RatingInputSerializer(serializers.Serializer):
