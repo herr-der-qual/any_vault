@@ -184,6 +184,7 @@ export function ProductDialog(props: Props) {
                         })),
                     ],
                 })
+                window.dispatchEvent(new CustomEvent('productCreated'))
             } else {
                 const product = props.product
                 await updateProduct(product.id, {

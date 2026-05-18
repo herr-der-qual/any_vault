@@ -127,6 +127,11 @@ export function useProductTable(view: TableView) {
 
     const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
 
+    useEffect(() => {
+        window.addEventListener('productCreated', refresh)
+        return () => window.removeEventListener('productCreated', refresh)
+    }, [refresh])
+
     return {
         products,
         total,
