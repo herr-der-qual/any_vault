@@ -32,7 +32,7 @@ export interface ProductRow {
     brand: string | null
     brand_id: number | null
     variant: string
-    flavors: string[]
+    flavors: {name: string; color: string | null}[]
     flavor_ids: number[]
     ratings: ProductRating[]
     comments: ProductComment[]

@@ -20,4 +20,4 @@ class CategorySerializer(serializers.ModelSerializer):
 class FlavorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flavor
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'color']

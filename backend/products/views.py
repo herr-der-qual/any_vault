@@ -7,6 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .filters import ProductFilter
@@ -173,6 +174,16 @@ class FlavorViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['patch'])
+    def set_color(self, request, pk=None):
+        qs = Flavor.objects.filter(
+            db_models.Q(user=None) | db_models.Q(user=request.user)
+        )
+        flavor = get_object_or_404(qs, pk=pk)
+        flavor.color = request.data.get('color') or ''
+        flavor.save(update_fields=['color'])
+        return Response({'id': flavor.id, 'color': flavor.color})
 
 
 class BulkProductCreateView(APIView):

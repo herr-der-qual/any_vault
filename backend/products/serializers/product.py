@@ -27,12 +27,15 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField()
     brand = serializers.StringRelatedField()
-    flavors = serializers.StringRelatedField(many=True)
+    flavors = serializers.SerializerMethodField()
     ratings = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
     category_id = serializers.SerializerMethodField()
     brand_id = serializers.SerializerMethodField()
     flavor_ids = serializers.SerializerMethodField()
+
+    def get_flavors(self, obj):
+        return [{'name': f.name, 'color': f.color or None} for f in obj.flavors.all()]
 
     def get_ratings(self, obj):
         return [{'user_id': r.user_id, 'value': r.value} for r in obj.ratings.all()]

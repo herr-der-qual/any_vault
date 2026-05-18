@@ -1,0 +1,52 @@
+.option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 4px;
+}
+
+.optionName {
+    flex: 1;
+}
+
+.optionEditBtn {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-left: auto;
+    cursor: pointer;
+    border: 1.5px solid rgba(0, 0, 0, 0.2);
+
+    &:hover {
+        border-color: rgba(0, 0, 0, 0.5);
+        transform: scale(1.15);
+    }
+}
+
+.colorGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 12px;
+}
+
+.colorSwatch {
+    display: block;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+    transition: border-color 0.1s;
+
+    &:hover {
+        border-color: rgba(0, 0, 0, 0.35);
+    }
+
+    &.active {
+        border-color: rgba(0, 0, 0, 0.65);
+    }
+}

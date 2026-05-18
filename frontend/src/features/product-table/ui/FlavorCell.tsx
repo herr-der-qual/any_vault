@@ -1,9 +1,22 @@
 import {useState} from 'react'
+import type React from 'react'
 import {Popover} from '@mui/material'
+import {COLORS} from '@/shared/ui/ColoredMultiSelect'
 import styles from './FlavorCell.module.scss'
 
+interface Flavor {
+    name: string
+    color: string | null
+}
+
 interface Props {
-    flavors: string[]
+    flavors: Flavor[]
+}
+
+function chipStyle(color: string | null): React.CSSProperties | undefined {
+    if (!color) return undefined
+    const text = COLORS.find(c => c.value === color)?.text ?? '#000'
+    return {backgroundColor: color, color: text}
 }
 
 export function FlavorCell({flavors}: Props) {
@@ -24,8 +37,8 @@ export function FlavorCell({flavors}: Props) {
                 style={{cursor: hasMore ? 'pointer' : 'default'}}
             >
                 {visible.map(f => (
-                    <span key={f} className={styles.chip}>
-                        {f}
+                    <span key={f.name} className={styles.chip} style={chipStyle(f.color)}>
+                        {f.name}
                     </span>
                 ))}
                 {hasMore &&
@@ -42,8 +55,8 @@ export function FlavorCell({flavors}: Props) {
             >
                 <div className={styles.popover}>
                     {flavors.map(f => (
-                        <span key={f} className={styles.chip}>
-                            {f}
+                        <span key={f.name} className={styles.chip} style={chipStyle(f.color)}>
+                            {f.name}
                         </span>
                     ))}
                 </div>

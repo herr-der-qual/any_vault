@@ -2,27 +2,25 @@ import {useState, useEffect} from 'react'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, Typography, Divider, Autocomplete,
-    CircularProgress, Checkbox, FormControl, InputLabel, Select, MenuItem,
+    CircularProgress, FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material'
 import {createFilterOptions} from '@mui/material'
-import {CheckBox as CheckBoxIcon, CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon} from '@mui/icons-material'
 import {useAuthenticationStore} from '@/app/store/authenticationStore'
 import {getMyGroups, getGroupMembers} from '@/app/api/groups'
 import {getCategories, createCategory, type Category} from '@/app/api/categories'
 import {getBrands, createBrand, type Brand} from '@/app/api/brands'
-import {getFlavors, createFlavor, type Flavor} from '@/app/api/flavors'
+import {getFlavors, createFlavor, updateFlavorColor, type Flavor} from '@/app/api/flavors'
 import {createProductBulk, updateProduct, rateProduct, commentProduct, type ProductRow} from '@/app/api/products'
-import type {Group, GroupMember} from '@/entities/group'
+import type {Group} from '@/entities/group'
 import {RatingPicker} from '@/shared/ui/RatingPicker'
+import {ColoredMultiSelect, type ColoredOption} from '@/shared/ui/ColoredMultiSelect'
 import styles from './ProductDialog.module.scss'
 
 type CreatableCategory = Category & {inputValue?: string}
 type CreatableBrand = Brand & {inputValue?: string}
-type CreatableFlavor = Flavor & {inputValue?: string}
 
 const categoryFilter = createFilterOptions<CreatableCategory>()
 const brandFilter = createFilterOptions<CreatableBrand>()
-const flavorFilter = createFilterOptions<CreatableFlavor>()
 
 type Props =
     | {
@@ -64,7 +62,7 @@ export function ProductDialog(props: Props) {
     const [category, setCategory] = useState<Category | null>(null)
     const [brand, setBrand] = useState<Brand | null>(null)
     const [variant, setVariant] = useState('')
-    const [selectedFlavors, setSelectedFlavors] = useState<Flavor[]>([])
+    const [selectedFlavors, setSelectedFlavors] = useState<ColoredOption<Flavor>[]>([])
     const [myRating, setMyRating] = useState<number | null>(null)
     const [myComment, setMyComment] = useState('')
     const [otherUsers, setOtherUsers] = useState<OtherUser[]>([])
@@ -96,7 +94,7 @@ export function ProductDialog(props: Props) {
                 setFlavors(fls)
                 setCategory(cats.find(c => c.id === product.category_id) ?? null)
                 setBrand(brs.find(b => b.id === product.brand_id) ?? null)
-                setSelectedFlavors(fls.filter(f => product.flavor_ids.includes(f.id)))
+                setSelectedFlavors(fls.filter(f => product.flavor_ids.includes(f.id)).map(f => ({item: f, color: f.color || null})))
                 setLoading(false)
             })
             setVariant(product.variant)
@@ -164,6 +162,11 @@ export function ProductDialog(props: Props) {
         onClose()
     }
 
+    const saveFlavorColors = async () => {
+        const changed = selectedFlavors.filter(sf => (sf.color || null) !== (sf.item.color || null))
+        await Promise.all(changed.map(sf => updateFlavorColor(sf.item.id, sf.color)))
+    }
+
     const handleSave = async () => {
         if (props.mode === 'create' && !category) return
         setSaving(true)
@@ -173,7 +176,7 @@ export function ProductDialog(props: Props) {
                     category: category!.id,
                     brand: brand?.id ?? null,
                     variant,
-                    flavors: selectedFlavors.map(f => f.id),
+                    flavors: selectedFlavors.map(f => f.item.id),
                     groups: selectedGroupId ? [selectedGroupId as number] : [],
                     entries: [
                         {user_id: currentUser!.id, rating: myRating, comment: myComment},
@@ -184,6 +187,7 @@ export function ProductDialog(props: Props) {
                         })),
                     ],
                 })
+                await saveFlavorColors()
                 window.dispatchEvent(new CustomEvent('productCreated'))
             } else {
                 const product = props.product
@@ -191,7 +195,7 @@ export function ProductDialog(props: Props) {
                     category: category?.id ?? product.category_id,
                     brand: brand !== undefined ? (brand?.id ?? null) : product.brand_id,
                     variant,
-                    flavors: selectedFlavors.map(f => f.id),
+                    flavors: selectedFlavors.map(f => f.item.id),
                 })
                 await rateProduct(product.id, myRating)
                 await commentProduct(product.id, myComment)
@@ -201,6 +205,7 @@ export function ProductDialog(props: Props) {
                         commentProduct(product.id, othersComments[u.userId] ?? '', u.userId),
                     ]))
                 }
+                await saveFlavorColors()
             }
             onSaved()
             handleClose()
@@ -360,60 +365,16 @@ export function ProductDialog(props: Props) {
                                 value={variant}
                                 onChange={e => setVariant(e.target.value)}
                             />
-                            <Autocomplete<CreatableFlavor, true>
-                                multiple
-                                disableCloseOnSelect
+                            <ColoredMultiSelect<Flavor>
                                 options={flavors}
                                 value={selectedFlavors}
-                                getOptionLabel={o => o.inputValue ? `Add "${o.inputValue}"` : o.name}
-                                isOptionEqualToValue={(o, v) => o.id === v.id}
-                                filterOptions={(opts, params) => {
-                                    const filtered = flavorFilter(opts, params)
-                                    if (params.inputValue && !opts.some(o => o.name.toLowerCase() === params.inputValue.toLowerCase())) {
-                                        filtered.push({id: -1, name: params.inputValue, inputValue: params.inputValue})
-                                    }
-                                    return filtered
+                                onChange={setSelectedFlavors}
+                                onCreate={async label => {
+                                    const f = await createFlavor(label)
+                                    setFlavors(prev => [...prev, f])
+                                    return f
                                 }}
-                                onChange={(_, v) => {
-                                    const newItem = v.find(f => f.inputValue)
-                                    if (newItem?.inputValue) {
-                                        createFlavor(newItem.inputValue).then(f => {
-                                            setFlavors(p => [...p, f])
-                                            setSelectedFlavors([...v.filter(sf => !sf.inputValue), f])
-                                        })
-                                    } else {
-                                        setSelectedFlavors(v)
-                                    }
-                                }}
-                                selectOnFocus
-                                clearOnBlur
-                                handleHomeEndKeys
-                                renderOption={(props, option, {selected}) => {
-                                    const {key, ...rest} = props as React.HTMLAttributes<HTMLLIElement> & {key: React.Key}
-                                    return (
-                                        <li
-                                            key={key}
-                                            {...rest}
-                                        >
-                                            {!option.inputValue && (
-                                                <Checkbox
-                                                    icon={<CheckBoxOutlineBlankIcon fontSize='small'/>}
-                                                    checkedIcon={<CheckBoxIcon fontSize='small'/>}
-                                                    checked={selected}
-                                                    style={{marginRight: 8, padding: 0}}
-                                                />
-                                            )}
-                                            {option.inputValue ? `Add "${option.inputValue}"` : option.name}
-                                        </li>
-                                    )
-                                }}
-                                renderInput={params => (
-                                    <TextField
-                                        {...params}
-                                        label='Flavors'
-                                        size='small'
-                                    />
-                                )}
+                                label='Flavors'
                             />
                         </div>
                     </section>
