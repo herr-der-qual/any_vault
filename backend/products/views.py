@@ -1,6 +1,7 @@
 from django.db import models as db_models
 from django.db.models import IntegerField, OuterRef, Subquery
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
@@ -87,6 +88,49 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save()
+
+    def _resolve_target_user_id(self, request, product):
+        from users.models import GroupMembership
+        raw = request.data.get('user_id')
+        if raw is None or int(raw) == request.user.id:
+            return request.user.id, None
+        group_ids = product.groups.values_list('id', flat=True)
+        ok = GroupMembership.objects.filter(
+            user=request.user, group_id__in=group_ids, role__in=['admin', 'moderator']
+        ).exists()
+        if not ok:
+            return None, Response({'detail': 'Permission denied.'}, status=403)
+        return int(raw), None
+
+    @action(detail=True, methods=['post'])
+    def rate(self, request, pk=None):
+        product = self.get_object()
+        target_user_id, err = self._resolve_target_user_id(request, product)
+        if err:
+            return err
+        value = request.data.get('value')
+        if value is None:
+            Rating.objects.filter(product=product, user_id=target_user_id).delete()
+        else:
+            Rating.objects.update_or_create(
+                product=product, user_id=target_user_id, defaults={'value': int(value)}
+            )
+        return Response(status=204)
+
+    @action(detail=True, methods=['post'])
+    def comment(self, request, pk=None):
+        product = self.get_object()
+        target_user_id, err = self._resolve_target_user_id(request, product)
+        if err:
+            return err
+        text = request.data.get('text', '').strip()
+        if text:
+            Comment.objects.update_or_create(
+                product=product, user_id=target_user_id, defaults={'text': text}
+            )
+        else:
+            Comment.objects.filter(product=product, user_id=target_user_id).delete()
+        return Response(status=204)
 
 
 class BrandViewSet(viewsets.ModelViewSet):

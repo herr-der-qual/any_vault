@@ -24,6 +24,7 @@ export function useProductTable(view: TableView) {
     const [debouncedSearch, setDebouncedSearch] = useState('')
     const [viewConfig, setViewConfig] = useState<ViewConfig>(() => configFromView(view))
     const [isDirty, setIsDirty] = useState(false)
+    const [refreshKey, setRefreshKey] = useState(0)
     const savedConfigRef = useRef<ViewConfig>(configFromView(view))
 
     // Reset when switching views
@@ -108,7 +109,7 @@ export function useProductTable(view: TableView) {
                 setTotal(data.count)
             })
             .finally(() => setLoading(false))
-    }, [groupId, debouncedSearch, viewConfig.sorting, viewConfig.filters])
+    }, [groupId, debouncedSearch, viewConfig.sorting, viewConfig.filters, refreshKey])
 
     const updateConfig = useCallback((updater: (prev: ViewConfig) => ViewConfig) => {
         setViewConfig(prev => {
@@ -124,6 +125,8 @@ export function useProductTable(view: TableView) {
         setIsDirty(false)
     }, [view.id, viewConfig])
 
+    const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
+
     return {
         products,
         total,
@@ -134,5 +137,6 @@ export function useProductTable(view: TableView) {
         updateConfig,
         isDirty,
         saveConfig,
+        refresh,
     }
 }

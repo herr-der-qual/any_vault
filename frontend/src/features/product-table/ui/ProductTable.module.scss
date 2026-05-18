@@ -56,6 +56,14 @@
     }
 }
 
+.rowClickable {
+    cursor: pointer;
+
+    &:hover td {
+        background-color: #f5f5f5;
+    }
+}
+
 .row {
     &:hover {
         background: #fafafa;

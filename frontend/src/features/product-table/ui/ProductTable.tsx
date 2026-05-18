@@ -24,6 +24,7 @@ import {CommentCell} from './CommentCell'
 import {ColumnSettingsPanel} from './ColumnSettingsPanel'
 import {SortSettingsPanel} from './SortSettingsPanel'
 import {FilterPanel} from './FilterPanel'
+import {ProductEditDialog} from './ProductEditDialog'
 import styles from './ProductTable.module.scss'
 
 interface Props {
@@ -153,8 +154,25 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
     const {
         products, loading, search, setSearch,
         viewConfig, updateConfig,
-        isDirty, saveConfig,
+        isDirty, saveConfig, refresh,
     } = useProductTable(view)
+
+    const [editingProduct, setEditingProduct] = useState<ProductRow | null>(null)
+
+    const memberNames = useMemo(() => {
+        const map: Record<number, string> = {}
+        for (const col of viewConfig.columns) {
+            if (col.id.startsWith('rating_') && col.userId && col.label) {
+                map[col.userId] = col.label
+            }
+        }
+        return map
+    }, [viewConfig.columns])
+
+    const canEditOthers = useMemo(() => {
+        const role = groups.find(g => g.id === view.group)?.role
+        return role === 'admin' || role === 'moderator'
+    }, [groups, view.group])
 
     const visibleColumns = viewConfig.columns.filter(c => c.visible)
 
@@ -321,7 +339,8 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
                             : table.getRowModel().rows.map(row => (
                                 <tr
                                     key={row.id}
-                                    className={styles.row}
+                                    className={`${styles.row} ${styles.rowClickable}`}
+                                    onClick={() => setEditingProduct(row.original)}
                                 >
                                     {row.getVisibleCells().map(cell => (
                                         <td
@@ -366,6 +385,15 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
                 onUpdated={onViewUpdated}
                 onDeleted={onViewDeleted}
             />
+            {editingProduct && (
+                <ProductEditDialog
+                    product={editingProduct}
+                    memberNames={memberNames}
+                    canEditOthers={canEditOthers}
+                    onClose={() => setEditingProduct(null)}
+                    onSaved={() => { setEditingProduct(null); refresh() }}
+                />
+            )}
         </div>
     )
 }
