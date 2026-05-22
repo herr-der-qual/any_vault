@@ -1,59 +1,86 @@
 services:
-  database-dev:
-    image: postgres:15
+  database:
+    image: postgres:15-alpine
+    container_name: anyvault_db
+    restart: always
     env_file:
-      - .env.dev
+      - .env.prod
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - network_dev
+      - anyvault_network
 
-  backend-dev:
+  backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile.dev
-    volumes:
-      - ./backend:/app
-      - type: tmpfs
-        target: /app/products/migrations
-    command: /bin/bash /app/entrypoint.dev.sh
+      dockerfile: backend/Dockerfile
+    container_name: anyvault_backend
+    restart: always
     environment:
-      - DEBUG=${DEBUG}
-      - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
-      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
-      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - SITE_URL=${SITE_URL}
-    ports:
-      - "8020:8000"
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+
+      DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      SITE_URL: ${SITE_URL}
+    volumes:
+      - static_files:/app/staticfiles
+      - media_files:/app/media
     depends_on:
-      database-dev:
+      database:
         condition: service_healthy
     networks:
-      - network_dev
+      - anyvault_network
 
-networks:
-  network_dev:
-    driver: bridge
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: anyvault_frontend
+    restart: always
+    volumes:
+      - static_files:/app/static
+    networks:
+      - anyvault_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: anyvault_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_files:/static:ro
+      - media_files:/media:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - anyvault_network
 
 volumes:
-  postgres_data_dev:
+  postgres_data:
+  static_files:
+  media_files:
+
+networks:
+  anyvault_network:
+    driver: bridge
