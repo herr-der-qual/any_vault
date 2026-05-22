@@ -25,6 +25,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: anyvault_backend
     restart: always
+    env_file:
+      - .env
     environment:
       - DEBUG=${DEBUG}
       - SECRET_KEY=${SECRET_KEY}
