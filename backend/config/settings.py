@@ -7,6 +7,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret')
 DEBUG = os.environ.get('DEBUG')
 
 print('==========================', SECRET_KEY)
+for key, value in os.environ.items():
+    print(f"{key} = {value}")
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
