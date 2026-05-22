@@ -1,8 +1,6 @@
 services:
   database-dev:
     image: postgres:15
-    env_file:
-      - .env.dev
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
