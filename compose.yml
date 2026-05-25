@@ -48,17 +48,6 @@ services:
     networks:
       - anyvault_network
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: anyvault_frontend
-    restart: always
-    volumes:
-      - static_files:/app/static
-    networks:
-      - anyvault_network
-
   nginx:
     image: nginx:alpine
     container_name: anyvault_nginx
@@ -72,9 +61,9 @@ services:
       - /etc/letsencrypt/live/any-vault.ru/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
       - static_files:/static:ro
       - media_files:/media:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
     depends_on:
       - backend
-      - frontend
     networks:
       - anyvault_network
 
