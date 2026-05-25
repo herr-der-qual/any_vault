@@ -68,6 +68,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt/live/any-vault.ru/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+      - /etc/letsencrypt/live/any-vault.ru/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
       - static_files:/static:ro
       - media_files:/media:ro
     depends_on:
