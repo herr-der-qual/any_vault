@@ -487,7 +487,7 @@ export function ProductDialog(props: Props) {
             )}
 
             <Divider/>
-            <DialogActions>
+            <DialogActions className={styles.actions}>
                 <Button onClick={handleClose}>
                     Cancel
                 </Button>
