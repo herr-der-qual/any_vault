@@ -1,27 +1,141 @@
+.wrapper {
+    position: relative;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    min-height: 40px;
+    padding: 7px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.23);
+    border-radius: 4px;
+    cursor: text;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &:hover:not(.containerFocused) {
+        border-color: rgba(0, 0, 0, 0.87);
+    }
+
+    &.containerFocused {
+        border: 2px solid #1976d2;
+        padding: 6px 11px;
+    }
+}
+
+.label {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    transform: translateY(-50%);
+    transform-origin: left center;
+    font-size: 1rem;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    background: white;
+    padding: 0 2px;
+    transition: top 0.2s, left 0.2s, transform 0.2s;
+    white-space: nowrap;
+
+    &.labelFloated {
+        top: 0;
+        left: 10px;
+        transform: translateY(-50%) scale(0.75);
+    }
+
+    &.labelActive {
+        color: #1976d2;
+    }
+}
+
+.inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+}
+
+.input {
+    flex: 1;
+    min-width: 50px;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+    font-family: inherit;
+    line-height: 1.4375em;
+    color: rgba(0, 0, 0, 0.87);
+    background: transparent;
+    cursor: text;
+    height: 24px;
+}
+
+.listbox {
+    padding: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
 .option {
     display: flex;
     align-items: center;
-    width: 100%;
     gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    min-height: 36px;
+    box-sizing: border-box;
+    user-select: none;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.04);
+    }
 }
 
-.optionName {
-    flex: 1;
+.createOption {
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+}
+
+.noOptions {
+    padding: 8px 16px;
+    color: rgba(0, 0, 0, 0.38);
+    font-size: 0.875rem;
+    text-align: center;
 }
 
 .optionEditBtn {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
     flex-shrink: 0;
     margin-left: auto;
-    cursor: pointer;
-    border: 1.5px solid rgba(0, 0, 0, 0.2);
 
-    &:hover {
-        border-color: rgba(0, 0, 0, 0.5);
-        transform: scale(1.15);
+    // dot mode (span)
+    &:not(button) {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 1.5px solid rgba(0, 0, 0, 0.2);
+
+        &:hover {
+            border-color: rgba(0, 0, 0, 0.5);
+            transform: scale(1.15);
+        }
+    }
+
+    // icon button mode
+    &:is(button) {
+        padding: 2px;
+        color: #9e9e9e;
+
+        &:hover {
+            color: #424242;
+        }
     }
 }
 

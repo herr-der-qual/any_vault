@@ -7,6 +7,7 @@ export interface Flavor {
     id: number
     name: string
     color: Color | null
+    user_id: number | null
 }
 
 export function getFlavors() {
@@ -15,6 +16,14 @@ export function getFlavors() {
 
 export function createFlavor(name: string) {
     return apiClient.post<Flavor>('/flavors/', {name})
+}
+
+export function renameFlavor(id: number, name: string) {
+    return apiClient.patch<Flavor>(`/flavors/${id}/`, {name})
+}
+
+export function deleteFlavor(id: number) {
+    return apiClient.delete<void>(`/flavors/${id}/`)
 }
 
 export function updateFlavorColor(id: number, colorId: number | null) {

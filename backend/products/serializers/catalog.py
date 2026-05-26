@@ -29,4 +29,4 @@ class FlavorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Flavor
-        fields = ['id', 'name', 'color']
+        fields = ['id', 'name', 'color', 'user_id']

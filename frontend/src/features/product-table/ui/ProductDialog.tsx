@@ -9,12 +9,13 @@ import {useAuthenticationStore} from '@/app/store/authenticationStore'
 import {getMyGroups, getGroupMembers} from '@/app/api/groups'
 import {getCategories, createCategory, type Category} from '@/app/api/categories'
 import {getBrands, createBrand, type Brand} from '@/app/api/brands'
-import {getFlavors, createFlavor, updateFlavorColor, type Flavor} from '@/app/api/flavors'
+import {getFlavors, createFlavor, renameFlavor, deleteFlavor, updateFlavorColor, type Flavor} from '@/app/api/flavors'
 import {getColors, type Color} from '@/app/api/colors'
 import {createProductBulk, updateProduct, rateProduct, commentProduct, type ProductRow} from '@/app/api/products'
 import type {Group} from '@/entities/group'
 import {RatingPicker} from '@/shared/ui/RatingPicker'
 import {ColoredMultiSelect, type ColoredOption} from '@/shared/ui/ColoredMultiSelect'
+import {FlavorEditDialog} from './FlavorEditDialog'
 import styles from './ProductDialog.module.scss'
 
 type CreatableCategory = Category & {inputValue?: string}
@@ -70,6 +71,7 @@ export function ProductDialog(props: Props) {
     const [otherUsers, setOtherUsers] = useState<OtherUser[]>([])
     const [othersRatings, setOthersRatings] = useState<Record<number, number | null>>({})
     const [othersComments, setOthersComments] = useState<Record<number, string>>({})
+    const [editingFlavor, setEditingFlavor] = useState<{flavor: Flavor; position: {top: number; left: number}} | null>(null)
 
     const productId = props.mode === 'edit' ? props.product.id : null
 
@@ -166,6 +168,26 @@ export function ProductDialog(props: Props) {
         onClose()
     }
 
+    const handleFlavorEditSave = async (name: string, color: Color | null) => {
+        if (!editingFlavor) return
+        const {flavor} = editingFlavor
+        if (name !== flavor.name) await renameFlavor(flavor.id, name)
+        const currentColorId = selectedFlavors.find(sf => sf.item.id === flavor.id)?.color?.id ?? null
+        if ((color?.id ?? null) !== currentColorId) await updateFlavorColor(flavor.id, color?.id ?? null)
+        const updatedFlavor = {...flavor, name, color}
+        setFlavors(prev => prev.map(f => f.id === flavor.id ? updatedFlavor : f))
+        setSelectedFlavors(prev => prev.map(sf => sf.item.id === flavor.id ? {...sf, item: updatedFlavor, color} : sf))
+    }
+
+    const handleFlavorDelete = async () => {
+        if (!editingFlavor) return
+        const id = editingFlavor.flavor.id
+        await deleteFlavor(id)
+        setFlavors(prev => prev.filter(f => f.id !== id))
+        setSelectedFlavors(prev => prev.filter(sf => sf.item.id !== id))
+        setEditingFlavor(null)
+    }
+
     const saveFlavorColors = async () => {
         const changed = selectedFlavors.filter(sf => (sf.color?.id ?? null) !== (sf.item.color?.id ?? null))
         await Promise.all(changed.map(sf => updateFlavorColor(sf.item.id, sf.color?.id ?? null)))
@@ -225,6 +247,7 @@ export function ProductDialog(props: Props) {
     const canEditOthers = props.mode === 'create' || props.canEditOthers
 
     return (
+        <>
         <Dialog
             open={open}
             fullScreen
@@ -379,6 +402,9 @@ export function ProductDialog(props: Props) {
                                     setFlavors(prev => [...prev, f])
                                     return f
                                 }}
+                                canEdit={f => f.user_id !== null}
+                                onEditClick={(f, position) => setEditingFlavor({flavor: f, position})}
+                                keepOpen={editingFlavor !== null}
                                 label='Flavors'
                             />
                         </div>
@@ -505,5 +531,18 @@ export function ProductDialog(props: Props) {
                 </Button>
             </DialogActions>
         </Dialog>
+
+        {editingFlavor && (
+            <FlavorEditDialog
+                position={editingFlavor.position}
+                flavor={editingFlavor.flavor}
+                initialColor={selectedFlavors.find(sf => sf.item.id === editingFlavor.flavor.id)?.color ?? editingFlavor.flavor.color}
+                colors={colors}
+                onClose={() => setEditingFlavor(null)}
+                onSave={handleFlavorEditSave}
+                onDelete={handleFlavorDelete}
+            />
+        )}
+        </>
     )
 }

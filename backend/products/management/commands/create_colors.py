@@ -3,17 +3,16 @@ from django.core.management.base import BaseCommand
 from products.models.color import Color
 
 COLOR_PALETTE = [
+    {'name': 'Pink',        'primary': '#FCE4EC', 'secondary': '#D81B60'},
     {'name': 'Red',         'primary': '#FFEBEE', 'secondary': '#C62828'},
     {'name': 'Orange',      'primary': '#FFF3E0', 'secondary': '#EF6C00'},
     {'name': 'Yellow',      'primary': '#FFFDE7', 'secondary': '#F9A825'},
     {'name': 'Light green', 'primary': '#F1F8E9', 'secondary': '#7CB342'},
-    {'name': 'Green',       'primary': '#E8F5E9', 'secondary': '#2E7D32'},
-    {'name': 'Dark green',  'primary': '#E0F2F1', 'secondary': '#00695C'},
-    {'name': 'Mint',        'primary': '#E0F2F1', 'secondary': '#00897B'},
-    {'name': 'Light blue',  'primary': '#E1F5FE', 'secondary': '#0288D1'},
-    {'name': 'Blue',        'primary': '#E8EAF6', 'secondary': '#283593'},
     {'name': 'Purple',      'primary': '#F3E5F5', 'secondary': '#7B1FA2'},
-    {'name': 'Pink',        'primary': '#FCE4EC', 'secondary': '#D81B60'},
+    {'name': 'Blue',        'primary': '#E8EAF6', 'secondary': '#283593'},
+    {'name': 'Light blue',  'primary': '#E1F5FE', 'secondary': '#0288D1'},
+    {'name': 'Mint',        'primary': '#E0F2F1', 'secondary': '#00897B'},
+    {'name': 'Green',       'primary': '#E8F5E9', 'secondary': '#2E7D32'},
     {'name': 'Brown',       'primary': '#F5ECE0', 'secondary': '#4E2E1C'},
     {'name': 'Black',       'primary': '#F5F5F5', 'secondary': '#212121'},
     {'name': 'Gray',        'primary': '#FAFAFA', 'secondary': '#9E9E9E'},
