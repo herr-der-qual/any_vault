@@ -1,8 +1,8 @@
 import {useState, useEffect} from 'react'
 import {
-    Popover, Button, TextField, Typography, Divider, InputAdornment, IconButton,
+    Popover, Button, TextField, InputAdornment, IconButton,
 } from '@mui/material'
-import {DeleteOutlined, ClearOutlined, CloseOutlined} from '@mui/icons-material'
+import {DeleteOutlined, ClearOutlined} from '@mui/icons-material'
 import type {Flavor} from '@/app/api/flavors'
 import type {Color} from '@/app/api/colors'
 import styles from './FlavorEditDialog.module.scss'

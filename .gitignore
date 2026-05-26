@@ -1,7 +1,5 @@
 /.idea/
 /__pycache__/
-/.env.dev
-/.env
 /.env
 /.claude/
 /backend/users/migrations/
