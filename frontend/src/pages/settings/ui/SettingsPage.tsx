@@ -135,7 +135,7 @@ export function SettingsPage() {
                 open={snackbarOpen}
                 autoHideDuration={3000}
                 onClose={() => setSnackbarOpen(false)}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
             >
                 <Alert severity='success' variant='filled' onClose={() => setSnackbarOpen(false)}>
                     Invite link copied!

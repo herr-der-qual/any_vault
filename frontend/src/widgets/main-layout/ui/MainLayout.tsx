@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {Outlet} from 'react-router-dom'
-import {Snackbar} from '@mui/material'
+import {Snackbar, Alert} from '@mui/material'
 import {TabBar} from '@/widgets/tab-bar'
 import {ProductDialog} from '@/features/product-table'
 import styles from './MainLayout.module.scss'
@@ -25,8 +25,12 @@ export function MainLayout() {
                 open={snackbarOpen}
                 autoHideDuration={3000}
                 onClose={() => setSnackbarOpen(false)}
-                message='Product added'
-            />
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+            >
+                <Alert severity='success' variant='filled' onClose={() => setSnackbarOpen(false)}>
+                    Product added
+                </Alert>
+            </Snackbar>
         </>
     )
 }

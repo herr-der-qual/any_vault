@@ -26,8 +26,8 @@ export function FlavorCell({flavors}: Props) {
         return <span className={styles.empty}>—</span>
     }
 
-    const visible = flavors.slice(0, 6)
-    const hasMore = flavors.length > 6
+    const visible = flavors.slice(0, 3)
+    const hasMore = flavors.length > 3
 
     return (
         <>
@@ -43,7 +43,7 @@ export function FlavorCell({flavors}: Props) {
                 ))}
                 {hasMore &&
                     <span className={styles.more}>
-                        +{flavors.length - 6}
+                        +{flavors.length - 3}
                     </span>
                 }
             </div>

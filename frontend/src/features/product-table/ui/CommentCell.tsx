@@ -13,8 +13,8 @@ export function CommentCell({text}: Props) {
         return <span className={styles.empty}>—</span>
     }
 
-    const truncated = text.length > 60 ? `${text.slice(0, 60)}...` : text
-    const hasMore = text.length > 60
+    const truncated = text.length > 20 ? `${text.slice(0, 20)}...` : text
+    const hasMore = text.length > 20
 
     return (
         <>
