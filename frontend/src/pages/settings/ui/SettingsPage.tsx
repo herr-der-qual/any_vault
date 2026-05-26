@@ -4,6 +4,7 @@ import {AddOutlined, LinkOutlined} from '@mui/icons-material'
 import {getMyGroups, getGroupMembers, updateMemberRole} from '@/app/api/groups'
 import {createQrInvite} from '@/app/api/invites'
 import {CreateGroupFlow} from '@/features/group'
+import {LogoutButton} from '@/features/authentication'
 import {useAuthenticationStore} from '@/app/store/authenticationStore'
 import type {Group, GroupMember} from '@/entities/group'
 import styles from './SettingsPage.module.scss'
@@ -125,6 +126,10 @@ export function SettingsPage() {
                 onClose={() => setCreateOpen(false)}
                 onCreated={loadGroups}
             />
+
+            <div className={styles.footer}>
+                <LogoutButton/>
+            </div>
 
             <Snackbar
                 open={snackbarOpen}
