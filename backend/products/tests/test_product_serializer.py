@@ -5,9 +5,10 @@ from django.test import TestCase
 from users.models import User, UserGroup
 from products.models.brand import Brand
 from products.models.category import Category
+from products.models.color import Color
 from products.models.flavor import Flavor
 from products.models.product import Product
-from products.serializers.product import ProductCreateSerializer
+from products.serializers.product import ProductCreateSerializer, ProductListSerializer
 
 
 def make_context(user):
@@ -153,3 +154,57 @@ class ProductCreateSerializerUpdateTestCase(TestCase):
         flavor_names = set(product.flavors.values_list('name', flat=True))
         self.assertEqual(flavor_names, {'Cola', 'Lemon'})
         self.assertNotIn('Original', flavor_names)
+
+
+class ProductListSerializerFlavorsTestCase(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.category = Category.objects.create(name='Energy Drink')
+        self.color = Color.objects.create(name='Green', primary='#a5d6a7', secondary='#000000')
+
+    def _make_product(self, flavors):
+        product = Product.objects.create(category=self.category, user=self.user)
+        product.flavors.set(flavors)
+        return product
+
+    def _serialize(self, product):
+        return ProductListSerializer(product).data
+
+    def test_flavor_without_color__returns_null(self):
+        flavor = Flavor.objects.create(name='Plain')
+        product = self._make_product([flavor])
+
+        data = self._serialize(product)
+
+        self.assertEqual(data['flavors'][0]['name'], 'Plain')
+        self.assertIsNone(data['flavors'][0]['color'])
+
+    def test_flavor_with_color__returns_color_object(self):
+        flavor = Flavor.objects.create(name='Berry', color=self.color)
+        product = self._make_product([flavor])
+
+        data = self._serialize(product)
+
+        color_data = data['flavors'][0]['color']
+        self.assertIsNotNone(color_data)
+        self.assertEqual(color_data['id'], self.color.id)
+        self.assertEqual(color_data['primary'], '#a5d6a7')
+        self.assertEqual(color_data['secondary'], '#000000')
+
+    def test_multiple_flavors__mixed_colors(self):
+        flavor_with = Flavor.objects.create(name='Colored', color=self.color)
+        flavor_without = Flavor.objects.create(name='Plain')
+        product = self._make_product([flavor_with, flavor_without])
+
+        data = self._serialize(product)
+
+        flavors_by_name = {f['name']: f for f in data['flavors']}
+        self.assertIsNotNone(flavors_by_name['Colored']['color'])
+        self.assertIsNone(flavors_by_name['Plain']['color'])
+
+    def test_no_flavors__returns_empty_list(self):
+        product = self._make_product([])
+
+        data = self._serialize(product)
+
+        self.assertEqual(data['flavors'], [])

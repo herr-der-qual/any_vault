@@ -1,1 +1,1 @@
-export {ColoredMultiSelect, type ColoredOption, COLORS} from './ColoredMultiSelect'
+export {ColoredMultiSelect, type ColoredOption, type Color} from './ColoredMultiSelect'

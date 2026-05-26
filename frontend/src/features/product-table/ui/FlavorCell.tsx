@@ -1,22 +1,21 @@
 import {useState} from 'react'
 import type React from 'react'
 import {Popover} from '@mui/material'
-import {COLORS} from '@/shared/ui/ColoredMultiSelect'
+import type {Color} from '@/app/api/colors'
 import styles from './FlavorCell.module.scss'
 
 interface Flavor {
     name: string
-    color: string | null
+    color: Color | null
 }
 
 interface Props {
     flavors: Flavor[]
 }
 
-function chipStyle(color: string | null): React.CSSProperties | undefined {
+function chipStyle(color: Color | null): React.CSSProperties | undefined {
     if (!color) return undefined
-    const text = COLORS.find(c => c.value === color)?.text ?? '#000'
-    return {backgroundColor: color, color: text}
+    return {backgroundColor: color.primary, color: color.secondary}
 }
 
 export function FlavorCell({flavors}: Props) {

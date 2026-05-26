@@ -10,6 +10,7 @@ import {getMyGroups, getGroupMembers} from '@/app/api/groups'
 import {getCategories, createCategory, type Category} from '@/app/api/categories'
 import {getBrands, createBrand, type Brand} from '@/app/api/brands'
 import {getFlavors, createFlavor, updateFlavorColor, type Flavor} from '@/app/api/flavors'
+import {getColors, type Color} from '@/app/api/colors'
 import {createProductBulk, updateProduct, rateProduct, commentProduct, type ProductRow} from '@/app/api/products'
 import type {Group} from '@/entities/group'
 import {RatingPicker} from '@/shared/ui/RatingPicker'
@@ -56,6 +57,7 @@ export function ProductDialog(props: Props) {
     const [categories, setCategories] = useState<Category[]>([])
     const [brands, setBrands] = useState<Brand[]>([])
     const [flavors, setFlavors] = useState<Flavor[]>([])
+    const [colors, setColors] = useState<Color[]>([])
     const [loading, setLoading] = useState(false)
     const [saving, setSaving] = useState(false)
 
@@ -76,25 +78,27 @@ export function ProductDialog(props: Props) {
         setLoading(true)
 
         if (props.mode === 'create') {
-            Promise.all([getMyGroups(), getCategories(), getBrands(), getFlavors()]).then(
-                ([grps, cats, brs, fls]) => {
+            Promise.all([getMyGroups(), getCategories(), getBrands(), getFlavors(), getColors()]).then(
+                ([grps, cats, brs, fls, cls]) => {
                     setGroups(grps)
                     setCategories(cats)
                     setBrands(brs)
                     setFlavors(fls)
+                    setColors(cls)
                     setSelectedGroupId(grps[0]?.id ?? '')
                     setLoading(false)
                 }
             )
         } else {
             const product = props.product
-            Promise.all([getCategories(), getBrands(), getFlavors()]).then(([cats, brs, fls]) => {
+            Promise.all([getCategories(), getBrands(), getFlavors(), getColors()]).then(([cats, brs, fls, cls]) => {
                 setCategories(cats)
                 setBrands(brs)
                 setFlavors(fls)
+                setColors(cls)
                 setCategory(cats.find(c => c.id === product.category_id) ?? null)
                 setBrand(brs.find(b => b.id === product.brand_id) ?? null)
-                setSelectedFlavors(fls.filter(f => product.flavor_ids.includes(f.id)).map(f => ({item: f, color: f.color || null})))
+                setSelectedFlavors(fls.filter(f => product.flavor_ids.includes(f.id)).map(f => ({item: f, color: f.color ?? null})))
                 setLoading(false)
             })
             setVariant(product.variant)
@@ -163,8 +167,8 @@ export function ProductDialog(props: Props) {
     }
 
     const saveFlavorColors = async () => {
-        const changed = selectedFlavors.filter(sf => (sf.color || null) !== (sf.item.color || null))
-        await Promise.all(changed.map(sf => updateFlavorColor(sf.item.id, sf.color)))
+        const changed = selectedFlavors.filter(sf => (sf.color?.id ?? null) !== (sf.item.color?.id ?? null))
+        await Promise.all(changed.map(sf => updateFlavorColor(sf.item.id, sf.color?.id ?? null)))
     }
 
     const handleSave = async () => {
@@ -368,6 +372,7 @@ export function ProductDialog(props: Props) {
                             <ColoredMultiSelect<Flavor>
                                 options={flavors}
                                 value={selectedFlavors}
+                                colors={colors}
                                 onChange={setSelectedFlavors}
                                 onCreate={async label => {
                                     const f = await createFlavor(label)

@@ -2,10 +2,16 @@ from django.contrib import admin
 
 from .models.brand import Brand
 from .models.category import Category
+from .models.color import Color
 from .models.flavor import Flavor
 from .models.product import Product
 from .models.rating import Rating
 from .models.comment import Comment
+
+
+@admin.register(Color)
+class ColorAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'primary', 'secondary')
 
 
 @admin.register(Brand)
@@ -24,8 +30,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Flavor)
 class FlavorAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'user')
-    list_select_related = ('user',)
+    list_display = ('id', 'name', 'color', 'user')
+    list_select_related = ('user', 'color')
     search_fields = ('name', 'user__email')
 
 

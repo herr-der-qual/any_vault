@@ -2,41 +2,30 @@ import {useState, useCallback} from 'react'
 import type React from 'react'
 import {Autocomplete, TextField, Chip, Popover, Checkbox} from '@mui/material'
 import {createFilterOptions} from '@mui/material'
+import type {Color} from '@/app/api/colors'
 import styles from './ColoredMultiSelect.module.scss'
+
+export type {Color}
 
 export interface ColoredOption<T> {
     item: T
-    color: string | null
+    color: Color | null
 }
-
-export const COLORS = [
-    {label: 'Light green', value: '#a5d6a7', text: '#000'},
-    {label: 'Pink',        value: '#f48fb1', text: '#000'},
-    {label: 'Purple',      value: '#ce93d8', text: '#000'},
-    {label: 'Light gray',  value: '#e0e0e0', text: '#000'},
-    {label: 'Blue',        value: '#64b5f6', text: '#000'},
-    {label: 'Light blue',  value: '#81d4fa', text: '#000'},
-    {label: 'Orange',      value: '#ffb74d', text: '#000'},
-    {label: 'Yellow',      value: '#fff176', text: '#000'},
-    {label: 'Red',         value: '#ef9a9a', text: '#000'},
-    {label: 'Brown',       value: '#a1887f', text: '#fff'},
-    {label: 'Dark gray',   value: '#757575', text: '#fff'},
-    {label: 'Dark green',  value: '#388e3c', text: '#fff'},
-]
 
 type Creatable<T> = T & {inputValue?: string}
 const baseFilter = createFilterOptions<{id: number; name: string; inputValue?: string}>()
 
-interface Props<T extends {id: number; name: string; color?: string | null}> {
+interface Props<T extends {id: number; name: string; color?: Color | null}> {
     options: T[]
     value: ColoredOption<T>[]
+    colors: Color[]
     onChange: (value: ColoredOption<T>[]) => void
     onCreate?: (label: string) => Promise<T>
     label?: string
 }
 
-export function ColoredMultiSelect<T extends {id: number; name: string; color?: string | null}>({
-    options, value, onChange, onCreate, label,
+export function ColoredMultiSelect<T extends {id: number; name: string; color?: Color | null}>({
+    options, value, colors, onChange, onCreate, label,
 }: Props<T>) {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const [coloringItemId, setColoringItemId] = useState<number | null>(null)
@@ -46,7 +35,7 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
         setColoringItemId(itemId)
     }, [])
 
-    const handleColorSelect = (color: string | null) => {
+    const handleColorSelect = (color: Color | null) => {
         if (coloringItemId === null) return
         const idx = value.findIndex(v => v.item.id === coloringItemId)
         if (idx !== -1) {
@@ -106,8 +95,8 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
                     tagValue.map((option, index) => {
                         const {key, ...itemProps} = getItemProps({index})
                         const colored = value[index]
-                        const bg = colored?.color ?? undefined
-                        const fg = bg ? (COLORS.find(c => c.value === bg)?.text ?? '#000') : undefined
+                        const bg = colored?.color?.primary
+                        const fg = colored?.color?.secondary
                         return (
                             <Chip
                                 key={key}
@@ -141,7 +130,7 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
                             <span className={styles.optionName}>{option.name}</span>
                             <span
                                 className={styles.optionEditBtn}
-                                style={{background: colored?.color ?? '#e0e0e0'}}
+                                style={{background: colored?.color?.primary ?? '#e0e0e0'}}
                                 onMouseDown={e => {
                                     e.stopPropagation()
                                     e.preventDefault()
@@ -175,13 +164,13 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
                         onClick={() => handleColorSelect(null)}
                         title='None'
                     />
-                    {COLORS.map(c => (
+                    {colors.map(c => (
                         <span
-                            key={c.value}
-                            className={`${styles.colorSwatch} ${coloringItem?.color === c.value ? styles.active : ''}`}
-                            style={{background: c.value}}
-                            onClick={() => handleColorSelect(c.value)}
-                            title={c.label}
+                            key={c.id}
+                            className={`${styles.colorSwatch} ${coloringItem?.color?.id === c.id ? styles.active : ''}`}
+                            style={{background: c.secondary}}
+                            onClick={() => handleColorSelect(c)}
+                            title={c.name}
                         />
                     ))}
                 </div>

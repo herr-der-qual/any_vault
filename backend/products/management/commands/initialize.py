@@ -1,6 +1,7 @@
 import os
 
 from django.core.management.base import BaseCommand
+from django.core.management import call_command
 from django.contrib.auth import get_user_model
 
 from users.models import UserGroup, GroupMembership
@@ -112,6 +113,9 @@ class Command(BaseCommand):
 
         # Group
         group = self._get_or_create_group(superuser, second_user)
+
+        # Colors
+        call_command('create_colors')
 
         # Seed products
         self._seed_products(superuser, second_user, group)

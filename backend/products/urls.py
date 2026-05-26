@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (
     ProductViewSet, RatingViewSet, CommentViewSet,
-    BrandViewSet, CategoryViewSet, FlavorViewSet,
+    BrandViewSet, CategoryViewSet, ColorViewSet, FlavorViewSet,
     BulkProductCreateView, TableViewViewSet,
 )
 
@@ -12,6 +12,7 @@ router.register('ratings', RatingViewSet, basename='rating')
 router.register('comments', CommentViewSet, basename='comment')
 router.register('brands', BrandViewSet, basename='brand')
 router.register('categories', CategoryViewSet, basename='category')
+router.register('colors', ColorViewSet, basename='color')
 router.register('flavors', FlavorViewSet, basename='flavor')
 router.register('table-views', TableViewViewSet, basename='tableview')
 

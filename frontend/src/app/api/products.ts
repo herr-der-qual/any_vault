@@ -1,4 +1,5 @@
 import {apiClient} from './client'
+import type {Color} from './colors'
 
 interface BulkEntry {
     user_id: number
@@ -32,7 +33,7 @@ export interface ProductRow {
     brand: string | null
     brand_id: number | null
     variant: string
-    flavors: {name: string; color: string | null}[]
+    flavors: {name: string; color: Color | null}[]
     flavor_ids: number[]
     ratings: ProductRating[]
     comments: ProductComment[]

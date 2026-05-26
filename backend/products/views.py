@@ -16,13 +16,14 @@ from .models.rating import Rating
 from .models.comment import Comment
 from .models.brand import Brand
 from .models.category import Category
+from .models.color import Color
 from .models.flavor import Flavor
 from .models.table_view import TableView
 from .serializers import (
     ProductSerializer, ProductCreateSerializer, ProductListSerializer,
     BulkProductCreateSerializer,
     RatingSerializer, CommentSerializer,
-    BrandSerializer, CategorySerializer, FlavorSerializer,
+    BrandSerializer, CategorySerializer, ColorSerializer, FlavorSerializer,
     TableViewSerializer,
 )
 from .permissions import CanEditPermission, IsOwnerOrReadOnly, ProductPermission
@@ -48,7 +49,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         user = self.request.user
         qs = Product.objects.filter(
             db_models.Q(user=user) | db_models.Q(groups__members=user)
-        ).distinct().prefetch_related('flavors', 'ratings', 'comments', 'groups')
+        ).distinct().prefetch_related('flavors__color', 'ratings', 'comments', 'groups')
 
         ordering_param = self.request.query_params.get('ordering', '')
         ordering = []
@@ -134,6 +135,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(status=204)
 
 
+class ColorViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ColorSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = Color.objects.all()
+
+
 class BrandViewSet(viewsets.ModelViewSet):
     serializer_class = BrandSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
@@ -181,9 +188,10 @@ class FlavorViewSet(viewsets.ModelViewSet):
             db_models.Q(user=None) | db_models.Q(user=request.user)
         )
         flavor = get_object_or_404(qs, pk=pk)
-        flavor.color = request.data.get('color') or ''
-        flavor.save(update_fields=['color'])
-        return Response({'id': flavor.id, 'color': flavor.color})
+        color_id = request.data.get('color_id')
+        flavor.color_id = color_id if color_id is not None else None
+        flavor.save(update_fields=['color_id'])
+        return Response({'id': flavor.id, 'color_id': flavor.color_id})
 
 
 class BulkProductCreateView(APIView):

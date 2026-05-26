@@ -1,9 +1,12 @@
 import {apiClient} from './client'
+import type {Color} from './colors'
+
+export type {Color}
 
 export interface Flavor {
     id: number
     name: string
-    color: string | null
+    color: Color | null
 }
 
 export function getFlavors() {
@@ -14,6 +17,6 @@ export function createFlavor(name: string) {
     return apiClient.post<Flavor>('/flavors/', {name})
 }
 
-export function updateFlavorColor(id: number, color: string | null) {
-    return apiClient.patch<{id: number; color: string}>(`/flavors/${id}/set_color/`, {color: color ?? ''})
+export function updateFlavorColor(id: number, colorId: number | null) {
+    return apiClient.patch<{id: number; color_id: number | null}>(`/flavors/${id}/set_color/`, {color_id: colorId})
 }

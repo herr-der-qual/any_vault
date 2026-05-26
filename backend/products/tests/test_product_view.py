@@ -5,6 +5,7 @@ from django.urls import reverse
 from users.models import User, UserGroup
 from products.models.brand import Brand
 from products.models.category import Category
+from products.models.color import Color
 from products.models.flavor import Flavor
 from products.models.product import Product
 
@@ -68,3 +69,45 @@ class ProductCreateTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('category', response.data)
+
+
+class ProductListFlavorsTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser', email='test@example.com', password='pass'
+        )
+        self.client.force_authenticate(user=self.user)
+
+        self.category = Category.objects.create(name='Energy Drink', user=self.user)
+        self.group = UserGroup.objects.create(name='Family')
+        self.color = Color.objects.create(name='Blue', primary='#64b5f6', secondary='#000000')
+        self.url = reverse('product-list')
+
+    def _create_product(self, flavors):
+        product = Product.objects.create(category=self.category, user=self.user)
+        product.flavors.set(flavors)
+        product.groups.add(self.group)
+        return product
+
+    def test_list__flavor_color_is_null_when_not_set(self):
+        flavor = Flavor.objects.create(name='Plain')
+        self._create_product([flavor])
+
+        response = self.client.get(self.url, {'group_id': self.group.id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        flavors = response.data['results'][0]['flavors']
+        self.assertEqual(flavors[0]['name'], 'Plain')
+        self.assertIsNone(flavors[0]['color'])
+
+    def test_list__flavor_color_object_returned_when_set(self):
+        flavor = Flavor.objects.create(name='Berry', color=self.color)
+        self._create_product([flavor])
+
+        response = self.client.get(self.url, {'group_id': self.group.id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        color_data = response.data['results'][0]['flavors'][0]['color']
+        self.assertEqual(color_data['id'], self.color.id)
+        self.assertEqual(color_data['primary'], '#64b5f6')
+        self.assertEqual(color_data['secondary'], '#000000')

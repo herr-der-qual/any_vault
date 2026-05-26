@@ -35,7 +35,17 @@ class ProductListSerializer(serializers.ModelSerializer):
     flavor_ids = serializers.SerializerMethodField()
 
     def get_flavors(self, obj):
-        return [{'name': f.name, 'color': f.color or None} for f in obj.flavors.all()]
+        result = []
+        for f in obj.flavors.all():
+            color = None
+            if f.color_id:
+                color = {
+                    'id': f.color.id,
+                    'primary': f.color.primary,
+                    'secondary': f.color.secondary,
+                }
+            result.append({'name': f.name, 'color': color})
+        return result
 
     def get_ratings(self, obj):
         return [{'user_id': r.user_id, 'value': r.value} for r in obj.ratings.all()]

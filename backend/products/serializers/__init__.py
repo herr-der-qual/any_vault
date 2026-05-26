@@ -5,7 +5,7 @@ from .product import (
     ProductSerializer, ProductCreateSerializer, ProductListSerializer,
     BulkProductCreateSerializer,
 )
-from .catalog import BrandSerializer, CategorySerializer, FlavorSerializer
+from .catalog import BrandSerializer, CategorySerializer, ColorSerializer, FlavorSerializer
 from .table_view import TableViewSerializer
 
 __all__ = [
@@ -13,7 +13,7 @@ __all__ = [
     'RatingSerializer', 'RatingCreateUpdateSerializer',
     'CommentSerializer', 'CommentCreateSerializer',
     'ProductSerializer', 'ProductCreateSerializer', 'ProductListSerializer',
-    'BrandSerializer', 'CategorySerializer', 'FlavorSerializer',
+    'BrandSerializer', 'CategorySerializer', 'ColorSerializer', 'FlavorSerializer',
     'BulkProductCreateSerializer',
     'TableViewSerializer',
 ]
