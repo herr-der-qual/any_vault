@@ -16,7 +16,6 @@ echo "==> Rebuilding and starting containers..."
 docker compose up --build -d --remove-orphans
 
 echo "==> Running migrations..."
-docker compose exec -T backend python manage.py makemigrations products users
 docker compose exec -T backend python manage.py migrate
 
 echo "==> Deploy complete!"

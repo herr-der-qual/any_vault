@@ -2,5 +2,4 @@
 /__pycache__/
 /.env
 /.claude/
-/backend/users/migrations/
 /.run/

@@ -23,8 +23,6 @@ services:
       dockerfile: backend/Dockerfile.dev
     volumes:
       - ./backend:/app
-      - type: tmpfs
-        target: /app/products/migrations
     command: /bin/bash /app/entrypoint.dev.sh
     environment:
       DEBUG: "True"

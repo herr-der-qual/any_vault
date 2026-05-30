@@ -317,4 +317,3 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,python,windows
 /.share/
 /.claude/settings.local.json
-/products/migrations/
