@@ -7,15 +7,15 @@ export interface Flavor {
     id: number
     name: string
     color: Color | null
-    user_id: number | null
+    group_id: number | null
 }
 
 export function getFlavors() {
     return apiClient.get<Flavor[]>('/flavors/')
 }
 
-export function createFlavor(name: string) {
-    return apiClient.post<Flavor>('/flavors/', {name})
+export function createFlavor(name: string, groupId: number | null) {
+    return apiClient.post<Flavor>('/flavors/', {name, group_id: groupId})
 }
 
 export function renameFlavor(id: number, name: string) {

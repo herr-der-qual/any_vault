@@ -26,7 +26,8 @@ from .serializers import (
     BrandSerializer, CategorySerializer, ColorSerializer, FlavorSerializer,
     TableViewSerializer,
 )
-from .permissions import CanEditPermission, IsOwnerOrReadOnly, ProductPermission
+from users.models import UserGroup, GroupMembership
+from .permissions import CanEditPermission, IsGroupMemberOrReadOnly, ProductPermission
 
 
 class ProductPagination(LimitOffsetPagination):
@@ -143,49 +144,53 @@ class ColorViewSet(viewsets.ReadOnlyModelViewSet):
 
 class BrandViewSet(viewsets.ModelViewSet):
     serializer_class = BrandSerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (IsAuthenticated, IsGroupMemberOrReadOnly)
 
     def get_queryset(self):
-        user = self.request.user
+        user_groups = UserGroup.objects.filter(members=self.request.user)
         return Brand.objects.filter(
-            db_models.Q(user=None) | db_models.Q(user=user)
+            db_models.Q(group=None) | db_models.Q(group__in=user_groups)
         )
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        group_id = self.request.data.get('group_id') or None
+        serializer.save(group_id=group_id)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (IsAuthenticated, IsGroupMemberOrReadOnly)
 
     def get_queryset(self):
-        user = self.request.user
+        user_groups = UserGroup.objects.filter(members=self.request.user)
         return Category.objects.filter(
-            db_models.Q(user=None) | db_models.Q(user=user)
+            db_models.Q(group=None) | db_models.Q(group__in=user_groups)
         )
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        group_id = self.request.data.get('group_id') or None
+        serializer.save(group_id=group_id)
 
 
 class FlavorViewSet(viewsets.ModelViewSet):
     serializer_class = FlavorSerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (IsAuthenticated, IsGroupMemberOrReadOnly)
 
     def get_queryset(self):
-        user = self.request.user
+        user_groups = UserGroup.objects.filter(members=self.request.user)
         return Flavor.objects.filter(
-            db_models.Q(user=None) | db_models.Q(user=user)
+            db_models.Q(group=None) | db_models.Q(group__in=user_groups)
         )
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        group_id = self.request.data.get('group_id') or None
+        serializer.save(group_id=group_id)
 
     @action(detail=True, methods=['patch'])
     def set_color(self, request, pk=None):
+        user_groups = UserGroup.objects.filter(members=request.user)
         qs = Flavor.objects.filter(
-            db_models.Q(user=None) | db_models.Q(user=request.user)
+            db_models.Q(group=None) | db_models.Q(group__in=user_groups)
         )
         flavor = get_object_or_404(qs, pk=pk)
         color_id = request.data.get('color_id')

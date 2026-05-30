@@ -35,6 +35,7 @@ type Props =
         mode: 'edit'
         open: boolean
         product: ProductRow
+        groupId: number
         memberNames: Record<number, string>
         canEditOthers: boolean
         onClose: () => void
@@ -240,6 +241,8 @@ export function ProductDialog(props: Props) {
         }
     }
 
+    const activeGroupId = props.mode === 'edit' ? props.groupId : (typeof selectedGroupId === 'number' ? selectedGroupId : null)
+
     const title = props.mode === 'create'
         ? 'New product'
         : [props.product.brand, props.product.variant].filter(Boolean).join(' ') || props.product.category
@@ -333,7 +336,7 @@ export function ProductDialog(props: Props) {
                                 onChange={(_, v) => {
                                     if (!v) { setCategory(null); return }
                                     if (v.inputValue) {
-                                        createCategory(v.inputValue).then(c => {
+                                        createCategory(v.inputValue, activeGroupId).then(c => {
                                             setCategories(p => [...p, c])
                                             setCategory(c)
                                         })
@@ -367,7 +370,7 @@ export function ProductDialog(props: Props) {
                                 onChange={(_, v) => {
                                     if (!v) { setBrand(null); return }
                                     if (v.inputValue) {
-                                        createBrand(v.inputValue).then(b => {
+                                        createBrand(v.inputValue, activeGroupId).then(b => {
                                             setBrands(p => [...p, b])
                                             setBrand(b)
                                         })
@@ -398,11 +401,11 @@ export function ProductDialog(props: Props) {
                                 colors={colors}
                                 onChange={setSelectedFlavors}
                                 onCreate={async label => {
-                                    const f = await createFlavor(label)
+                                    const f = await createFlavor(label, activeGroupId)
                                     setFlavors(prev => [...prev, f])
                                     return f
                                 }}
-                                canEdit={f => f.user_id !== null}
+                                canEdit={f => f.group_id !== null}
                                 onEditClick={(f, position) => setEditingFlavor({flavor: f, position})}
                                 keepOpen={editingFlavor !== null}
                                 label='Flavors'

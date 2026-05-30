@@ -16,23 +16,23 @@ class ColorAdmin(admin.ModelAdmin):
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'user')
-    list_select_related = ('user',)
-    search_fields = ('name', 'user__email')
+    list_display = ('id', 'name', 'group')
+    list_select_related = ('group',)
+    search_fields = ('name', 'group__name')
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'user')
-    list_select_related = ('user',)
-    search_fields = ('name', 'user__email')
+    list_display = ('id', 'name', 'group')
+    list_select_related = ('group',)
+    search_fields = ('name', 'group__name')
 
 
 @admin.register(Flavor)
 class FlavorAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'color', 'user')
-    list_select_related = ('user', 'color')
-    search_fields = ('name', 'user__email')
+    list_display = ('id', 'name', 'color', 'group')
+    list_select_related = ('group', 'color')
+    search_fields = ('name', 'group__name')
 
 
 class RatingInline(admin.TabularInline):

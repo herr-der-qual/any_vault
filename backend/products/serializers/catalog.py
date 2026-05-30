@@ -9,13 +9,13 @@ from ..models.flavor import Flavor
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'group_id']
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'group_id']
 
 
 class ColorSerializer(serializers.ModelSerializer):
@@ -29,4 +29,4 @@ class FlavorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Flavor
-        fields = ['id', 'name', 'color', 'user_id']
+        fields = ['id', 'name', 'color', 'group_id']

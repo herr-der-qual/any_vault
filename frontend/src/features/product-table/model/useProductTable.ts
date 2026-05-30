@@ -23,16 +23,14 @@ export function useProductTable(view: TableView) {
     const [search, setSearch] = useState('')
     const [debouncedSearch, setDebouncedSearch] = useState('')
     const [viewConfig, setViewConfig] = useState<ViewConfig>(() => configFromView(view))
-    const [isDirty, setIsDirty] = useState(false)
     const [refreshKey, setRefreshKey] = useState(0)
-    const savedConfigRef = useRef<ViewConfig>(configFromView(view))
+    const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // Reset when switching views
     useEffect(() => {
+        if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
         const cfg = configFromView(view)
         setViewConfig(cfg)
-        savedConfigRef.current = cfg
-        setIsDirty(false)
         setSearch('')
         setDebouncedSearch('')
     }, [view.id])
@@ -114,16 +112,13 @@ export function useProductTable(view: TableView) {
     const updateConfig = useCallback((updater: (prev: ViewConfig) => ViewConfig) => {
         setViewConfig(prev => {
             const next = updater(prev)
-            setIsDirty(JSON.stringify(next) !== JSON.stringify(savedConfigRef.current))
+            if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+            saveTimerRef.current = setTimeout(() => {
+                void updateTableView(view.id, {config: next as unknown as TableViewConfig})
+            }, 600)
             return next
         })
-    }, [])
-
-    const saveConfig = useCallback(async () => {
-        await updateTableView(view.id, {config: viewConfig as unknown as TableViewConfig})
-        savedConfigRef.current = viewConfig
-        setIsDirty(false)
-    }, [view.id, viewConfig])
+    }, [view.id])
 
     const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
 
@@ -140,8 +135,6 @@ export function useProductTable(view: TableView) {
         setSearch,
         viewConfig,
         updateConfig,
-        isDirty,
-        saveConfig,
         refresh,
     }
 }

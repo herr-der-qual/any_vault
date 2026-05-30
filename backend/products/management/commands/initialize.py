@@ -169,10 +169,10 @@ class Command(BaseCommand):
             return
 
         for item in SEED_DATA:
-            category, _ = Category.objects.get_or_create(name=item['category'])
-            brand, _ = Brand.objects.get_or_create(name=item['brand'])
+            category, _ = Category.objects.get_or_create(name=item['category'], group=group)
+            brand, _ = Brand.objects.get_or_create(name=item['brand'], group=group)
             flavors = [
-                Flavor.objects.get_or_create(name=name)[0]
+                Flavor.objects.get_or_create(name=name, group=group)[0]
                 for name in item['flavors']
             ]
 

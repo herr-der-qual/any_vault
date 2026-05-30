@@ -3,11 +3,13 @@ from rest_framework import permissions
 from users.models import GroupMembership
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
+class IsGroupMemberOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return obj.user == request.user
+        if obj.group is None:
+            return False
+        return GroupMembership.objects.filter(user=request.user, group=obj.group).exists()
 
 
 class ProductPermission(permissions.BasePermission):
