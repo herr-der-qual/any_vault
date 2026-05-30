@@ -11,7 +11,7 @@ import {
 import {
     Search as SearchIcon, ViewColumn as ColumnIcon,
     Sort as SortIcon, FilterList as FilterIcon,
-    Settings as SettingsIcon, Save as SaveIcon, Clear as ClearIcon,
+    Settings as SettingsIcon, Clear as ClearIcon,
 } from '@mui/icons-material'
 import {useAuthenticationStore} from '@/app/store/authenticationStore'
 import {updateTableView} from '@/app/api/tableViews'
@@ -68,10 +68,17 @@ function ViewSettingsPanel({open, view, groups, onClose, onUpdated, onDeleted}: 
     const [name, setName] = useState(view.name)
     const [groupId, setGroupId] = useState(view.group)
 
-    const handleSave = async () => {
-        const updated = await updateTableView(view.id, {name, config: view.config})
+    const saveName = async () => {
+        const trimmed = name.trim()
+        if (!trimmed || trimmed === view.name) return
+        const updated = await updateTableView(view.id, {name: trimmed, config: view.config})
         onUpdated({...updated, group: groupId})
-        onClose()
+    }
+
+    const handleGroupChange = async (newGroupId: number) => {
+        setGroupId(newGroupId)
+        const updated = await updateTableView(view.id, {name: name.trim() || view.name, config: view.config})
+        onUpdated({...updated, group: newGroupId})
     }
 
     const handleDelete = () => {
@@ -102,6 +109,8 @@ function ViewSettingsPanel({open, view, groups, onClose, onUpdated, onDeleted}: 
                         fullWidth
                         value={name}
                         onChange={e => setName(e.target.value)}
+                        onBlur={saveName}
+                        onKeyDown={e => { if (e.key === 'Enter') { void saveName() } }}
                     />
                     <FormControl
                         size='small'
@@ -113,7 +122,7 @@ function ViewSettingsPanel({open, view, groups, onClose, onUpdated, onDeleted}: 
                         <Select
                             label='Group'
                             value={groupId}
-                            onChange={e => setGroupId(Number(e.target.value))}
+                            onChange={e => { void handleGroupChange(Number(e.target.value)) }}
                         >
                             {groups.map(g => (
                                 <MenuItem
@@ -125,13 +134,6 @@ function ViewSettingsPanel({open, view, groups, onClose, onUpdated, onDeleted}: 
                             ))}
                         </Select>
                     </FormControl>
-                    <Button
-                        variant='contained'
-                        onClick={handleSave}
-                        disabled={!name.trim()}
-                    >
-                        Save
-                    </Button>
                     <Button
                         variant='outlined'
                         color='error'
@@ -154,8 +156,7 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
 
     const {
         products, loading, search, setSearch,
-        viewConfig, updateConfig,
-        isDirty, saveConfig, refresh,
+        viewConfig, updateConfig, refresh,
     } = useProductTable(view)
 
     const [editingProduct, setEditingProduct] = useState<ProductRow | null>(null)
@@ -280,15 +281,6 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
                     className={`${styles.searchField} ${search ? '' : styles.searchFieldEmpty}`}
                 />
                 <div className={styles.spacer}/>
-                {isDirty && (
-                    <IconButton
-                        size='small'
-                        color='primary'
-                        onClick={saveConfig}
-                    >
-                        <SaveIcon/>
-                    </IconButton>
-                )}
                 <IconButton
                     size='small'
                     onClick={() => setShowFilter(true)}
@@ -405,6 +397,7 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
                     mode='edit'
                     open
                     product={editingProduct}
+                    groupId={view.group}
                     memberNames={memberNames}
                     canEditOthers={canEditOthers}
                     onClose={() => setEditingProduct(null)}
