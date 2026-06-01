@@ -238,7 +238,7 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
                         </div>
                     )
                 } else if (col.id === 'flavors') {
-                    return <FlavorCell flavors={product.flavors}/>
+                    return <FlavorCell flavors={product.flavors} noSugar={product.no_sugar}/>
                 } else if (col.id === 'my_rating') {
                     const r = product.ratings.find(r => r.user_id === currentUser?.id)
 

@@ -94,7 +94,9 @@ export function useProductTable(view: TableView) {
         }
 
         for (const filter of viewConfig.filters) {
-            if (!filter.value) {
+            if (filter.field === 'no_sugar') {
+                params.no_sugar = filter.value === 'true'
+            } else if (!filter.value) {
                 continue
             } else if (filter.operator === 'eq' || filter.operator === 'contains') {
                 params[filter.field] = filter.value

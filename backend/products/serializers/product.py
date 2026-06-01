@@ -64,7 +64,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'category', 'category_id', 'brand', 'brand_id', 'variant', 'flavors', 'flavor_ids', 'ratings', 'comments', 'image']
+        fields = ['id', 'category', 'category_id', 'brand', 'brand_id', 'variant', 'flavors', 'flavor_ids', 'ratings', 'comments', 'image', 'no_sugar']
 
 
 class RatingInputSerializer(serializers.Serializer):
@@ -83,7 +83,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'category', 'brand', 'variant', 'flavors', 'groups', 'description', 'image', 'ratings', 'comments']
+        fields = ['id', 'category', 'brand', 'variant', 'flavors', 'groups', 'description', 'image', 'no_sugar', 'ratings', 'comments']
         extra_kwargs = {
             'flavors': {'required': False},
             'groups': {'required': False},
@@ -129,6 +129,7 @@ class BulkProductCreateSerializer(serializers.Serializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), required=False, allow_null=True)
     variant = serializers.CharField(max_length=64, allow_blank=True, default='')
+    no_sugar = serializers.BooleanField(default=False)
     flavors = serializers.PrimaryKeyRelatedField(queryset=Flavor.objects.all(), many=True, required=False)
     groups = serializers.PrimaryKeyRelatedField(queryset=UserGroup.objects.all(), many=True, required=False)
     entries = BulkEntrySerializer(many=True, min_length=1)

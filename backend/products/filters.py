@@ -8,7 +8,8 @@ class ProductFilter(django_filters.FilterSet):
     brand = django_filters.CharFilter(field_name='brand__name', lookup_expr='icontains')
     flavor = django_filters.CharFilter(field_name='flavors__name', lookup_expr='icontains')
     group_id = django_filters.NumberFilter(field_name='groups__id')
+    no_sugar = django_filters.BooleanFilter()
 
     class Meta:
         model = Product
-        fields = ['category', 'brand', 'flavor', 'group_id']
+        fields = ['category', 'brand', 'flavor', 'group_id', 'no_sugar']

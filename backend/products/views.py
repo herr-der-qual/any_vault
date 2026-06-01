@@ -216,6 +216,7 @@ class BulkProductCreateView(APIView):
             category=data['category'],
             brand=data.get('brand'),
             variant=data.get('variant', ''),
+            no_sugar=data.get('no_sugar', False),
         )
         product.flavors.set(flavors)
         product.groups.set(groups)

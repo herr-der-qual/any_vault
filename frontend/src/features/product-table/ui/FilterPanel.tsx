@@ -10,6 +10,7 @@ const FILTER_FIELDS = [
     {value: 'category', label: 'Category'},
     {value: 'brand', label: 'Brand'},
     {value: 'flavor', label: 'Flavor'},
+    {value: 'no_sugar', label: 'No sugar'},
 ]
 
 const OPERATORS: {value: FilterOperator; label: string}[] = [
@@ -63,39 +64,53 @@ export function FilterPanel({open, filters, onClose, onChange}: Props) {
                             <Select
                                 size='small'
                                 value={filter.field}
-                                onChange={e => update(i, {field: e.target.value})}
+                                onChange={e => {
+                                    const field = e.target.value
+                                    update(i, field === 'no_sugar'
+                                        ? {field, operator: 'eq', value: 'true'}
+                                        : {field}
+                                    )
+                                }}
                                 className={styles.fieldSelect}
                             >
                                 {FILTER_FIELDS.map(f => (
-                                    <MenuItem
-                                        key={f.value}
-                                        value={f.value}
-                                    >
+                                    <MenuItem key={f.value} value={f.value}>
                                         {f.label}
                                     </MenuItem>
                                 ))}
                             </Select>
-                            <Select
-                                size='small'
-                                value={filter.operator}
-                                onChange={e => update(i, {operator: e.target.value as FilterOperator})}
-                                className={styles.operatorSelect}
-                            >
-                                {OPERATORS.map(op => (
-                                    <MenuItem
-                                        key={op.value}
-                                        value={op.value}
+                            {filter.field === 'no_sugar' ? (
+                                <Select
+                                    size='small'
+                                    value={filter.value || 'true'}
+                                    onChange={e => update(i, {value: e.target.value})}
+                                    className={styles.valueField}
+                                >
+                                    <MenuItem value='true'>Yes</MenuItem>
+                                    <MenuItem value='false'>No</MenuItem>
+                                </Select>
+                            ) : (
+                                <>
+                                    <Select
+                                        size='small'
+                                        value={filter.operator}
+                                        onChange={e => update(i, {operator: e.target.value as FilterOperator})}
+                                        className={styles.operatorSelect}
                                     >
-                                        {op.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <TextField
-                                size='small'
-                                value={filter.value}
-                                onChange={e => update(i, {value: e.target.value})}
-                                className={styles.valueField}
-                            />
+                                        {OPERATORS.map(op => (
+                                            <MenuItem key={op.value} value={op.value}>
+                                                {op.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    <TextField
+                                        size='small'
+                                        value={filter.value}
+                                        onChange={e => update(i, {value: e.target.value})}
+                                        className={styles.valueField}
+                                    />
+                                </>
+                            )}
                             <IconButton
                                 size='small'
                                 onClick={() => onChange(filters.filter((_, j) => j !== i))}

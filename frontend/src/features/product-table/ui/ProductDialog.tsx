@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, Typography, Divider, Autocomplete,
-    CircularProgress, FormControl, InputLabel, Select, MenuItem,
+    CircularProgress, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox,
 } from '@mui/material'
 import {createFilterOptions} from '@mui/material'
 import {useAuthenticationStore} from '@/app/store/authenticationStore'
@@ -66,6 +66,7 @@ export function ProductDialog(props: Props) {
     const [category, setCategory] = useState<Category | null>(null)
     const [brand, setBrand] = useState<Brand | null>(null)
     const [variant, setVariant] = useState('')
+    const [noSugar, setNoSugar] = useState(false)
     const [selectedFlavors, setSelectedFlavors] = useState<ColoredOption<Flavor>[]>([])
     const [myRating, setMyRating] = useState<number | null>(null)
     const [myComment, setMyComment] = useState('')
@@ -105,6 +106,7 @@ export function ProductDialog(props: Props) {
                 setLoading(false)
             })
             setVariant(product.variant)
+        setNoSugar(product.no_sugar)
             const myR = product.ratings.find(r => r.user_id === currentUser?.id)
             const myC = product.comments.find(c => c.user_id === currentUser?.id)
             setMyRating(myR?.value ?? null)
@@ -160,6 +162,7 @@ export function ProductDialog(props: Props) {
             setCategory(null)
             setBrand(null)
             setVariant('')
+            setNoSugar(false)
             setSelectedFlavors([])
             setMyRating(null)
             setMyComment('')
@@ -203,6 +206,7 @@ export function ProductDialog(props: Props) {
                     category: category!.id,
                     brand: brand?.id ?? null,
                     variant,
+                    no_sugar: noSugar,
                     flavors: selectedFlavors.map(f => f.item.id),
                     groups: selectedGroupId ? [selectedGroupId as number] : [],
                     entries: [
@@ -222,6 +226,7 @@ export function ProductDialog(props: Props) {
                     category: category?.id ?? product.category_id,
                     brand: brand !== undefined ? (brand?.id ?? null) : product.brand_id,
                     variant,
+                    no_sugar: noSugar,
                     flavors: selectedFlavors.map(f => f.item.id),
                 })
                 await rateProduct(product.id, myRating)
@@ -409,6 +414,16 @@ export function ProductDialog(props: Props) {
                                 onEditClick={(f, position) => setEditingFlavor({flavor: f, position})}
                                 keepOpen={editingFlavor !== null}
                                 label='Flavors'
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={noSugar}
+                                        onChange={e => setNoSugar(e.target.checked)}
+                                        size='small'
+                                    />
+                                }
+                                label='No sugar'
                             />
                         </div>
                     </section>

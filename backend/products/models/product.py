@@ -16,6 +16,7 @@ class Product(models.Model):
     flavors = models.ManyToManyField(Flavor, related_name='products')
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    no_sugar = models.BooleanField(default=False)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='products')
     groups = models.ManyToManyField(UserGroup, related_name='visible_products')

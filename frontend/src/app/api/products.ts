@@ -11,6 +11,7 @@ export interface BulkCreateProductPayload {
     category: number
     brand: number | null
     variant: string
+    no_sugar: boolean
     flavors: number[]
     groups: number[]
     entries: BulkEntry[]
@@ -38,6 +39,7 @@ export interface ProductRow {
     ratings: ProductRating[]
     comments: ProductComment[]
     image: string | null
+    no_sugar: boolean
 }
 
 export interface ProductsResponse {
@@ -53,7 +55,7 @@ export function getProducts(params: Record<string, string | number | boolean | u
     return apiClient.get<ProductsResponse>('/products/', params)
 }
 
-export function updateProduct(id: number, data: {category?: number; brand?: number | null; variant?: string; flavors?: number[]}) {
+export function updateProduct(id: number, data: {category?: number; brand?: number | null; variant?: string; flavors?: number[]; no_sugar?: boolean}) {
     return apiClient.patch<ProductRow>(`/products/${id}/`, data)
 }
 

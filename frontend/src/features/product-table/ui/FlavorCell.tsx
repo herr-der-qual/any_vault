@@ -11,6 +11,7 @@ interface Flavor {
 
 interface Props {
     flavors: Flavor[]
+    noSugar?: boolean
 }
 
 function chipStyle(color: Color | null): React.CSSProperties | undefined {
@@ -18,10 +19,10 @@ function chipStyle(color: Color | null): React.CSSProperties | undefined {
     return {backgroundColor: color.primary, color: color.secondary}
 }
 
-export function FlavorCell({flavors}: Props) {
+export function FlavorCell({flavors, noSugar}: Props) {
     const [anchor, setAnchor] = useState<HTMLElement | null>(null)
 
-    if (flavors.length === 0) {
+    if (!noSugar && flavors.length === 0) {
         return <span className={styles.empty}>—</span>
     }
 
@@ -35,6 +36,9 @@ export function FlavorCell({flavors}: Props) {
                 onClick={e => hasMore && setAnchor(e.currentTarget)}
                 style={{cursor: hasMore ? 'pointer' : 'default'}}
             >
+                {noSugar && (
+                    <span className={styles.chip}>No sugar</span>
+                )}
                 {visible.map(f => (
                     <span key={f.name} className={styles.chip} style={chipStyle(f.color)}>
                         {f.name}
@@ -53,6 +57,9 @@ export function FlavorCell({flavors}: Props) {
                 anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
             >
                 <div className={styles.popover}>
+                    {noSugar && (
+                        <span className={styles.chip}>No sugar</span>
+                    )}
                     {flavors.map(f => (
                         <span key={f.name} className={styles.chip} style={chipStyle(f.color)}>
                             {f.name}
