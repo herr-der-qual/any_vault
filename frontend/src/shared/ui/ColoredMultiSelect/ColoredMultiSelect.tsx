@@ -86,6 +86,7 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
         } else {
             onChange([...value, {item, color: item.color ?? null}])
         }
+        setInputValue('')
     }
 
     const handleCreate = async () => {
