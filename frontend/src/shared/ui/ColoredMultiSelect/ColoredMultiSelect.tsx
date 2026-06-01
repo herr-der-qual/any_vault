@@ -95,6 +95,28 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
         setInputValue('')
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        const total = filtered.length + (canCreate ? 1 : 0)
+        if (e.key === 'Escape') { setOpen(false); setInputValue('') }
+        else if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            if (total > 0) setFocusedIndex(i => (i + 1) % total)
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            if (total > 0) setFocusedIndex(i => (i <= 0 ? total - 1 : i - 1))
+        } else if (e.key === 'Enter') {
+            const item = focusedIndex >= 0 && focusedIndex < filtered.length ? filtered[focusedIndex] : undefined
+            if (item) {
+                e.preventDefault()
+                toggleItem(item)
+            } else if (canCreate) {
+                void handleCreate()
+            }
+        } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
+            onChange(value.slice(0, -1))
+        }
+    }
+
     const handleColorClick = (el: HTMLElement, itemId: number) => {
         setColorAnchorEl(el)
         setColoringItemId(itemId)
@@ -157,27 +179,8 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
                         ref={inputRef}
                         value={inputValue}
                         onChange={e => setInputValue(e.target.value)}
-                        onFocus={() => setOpen(true)}
-                        onKeyDown={e => {
-                            const total = filtered.length + (canCreate ? 1 : 0)
-                            if (e.key === 'Escape') { setOpen(false); setInputValue('') }
-                            else if (e.key === 'ArrowDown') {
-                                e.preventDefault()
-                                if (total > 0) setFocusedIndex(i => (i + 1) % total)
-                            } else if (e.key === 'ArrowUp') {
-                                e.preventDefault()
-                                if (total > 0) setFocusedIndex(i => (i <= 0 ? total - 1 : i - 1))
-                            } else if (e.key === 'Enter') {
-                                if (focusedIndex >= 0 && focusedIndex < filtered.length) {
-                                    e.preventDefault()
-                                    toggleItem(filtered[focusedIndex])
-                                } else if (canCreate) {
-                                    void handleCreate()
-                                }
-                            } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
-                                onChange(value.slice(0, -1))
-                            }
-                        }}
+                        onClick={() => { setOpen(prevState => !prevState) }}
+                        onKeyDown={handleKeyDown}
                         className={styles.input}
                     />
                 </div>
