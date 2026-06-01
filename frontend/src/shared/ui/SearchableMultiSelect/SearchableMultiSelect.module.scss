@@ -45,6 +45,14 @@
     }
 }
 
+.itemFocused {
+    background-color: #f5f5f5;
+
+    &.itemSelected {
+        background-color: #bbdefb;
+    }
+}
+
 .itemLabel {
     flex: 1;
 }
@@ -74,6 +82,10 @@
         opacity: 0.6;
         cursor: default;
     }
+}
+
+.addItemFocused {
+    background-color: #e3f2fd;
 }
 
 .error {

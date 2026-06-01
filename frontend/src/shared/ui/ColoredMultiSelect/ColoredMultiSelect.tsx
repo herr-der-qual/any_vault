@@ -30,11 +30,19 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
     const [inputValue, setInputValue] = useState('')
     const [colorAnchorEl, setColorAnchorEl] = useState<HTMLElement | null>(null)
     const [coloringItemId, setColoringItemId] = useState<number | null>(null)
+    const [focusedIndex, setFocusedIndex] = useState(-1)
     const wrapperRef = useRef<HTMLDivElement>(null)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const keepOpenRef = useRef(keepOpen ?? false)
     useEffect(() => { keepOpenRef.current = keepOpen ?? false }, [keepOpen])
+    useEffect(() => { setFocusedIndex(-1) }, [inputValue])
+    useEffect(() => { if (!open) setFocusedIndex(-1) }, [open])
+
+    useEffect(() => {
+        if (focusedIndex < 0 || !dropdownRef.current) return
+        dropdownRef.current.querySelectorAll<HTMLElement>('[data-idx]')[focusedIndex]?.scrollIntoView({block: 'nearest'})
+    }, [focusedIndex])
 
     const selectedIds = useMemo(() => new Set(value.map(v => v.item.id)), [value])
     const coloringItem = value.find(v => v.item.id === coloringItemId)
@@ -151,9 +159,22 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
                         onChange={e => setInputValue(e.target.value)}
                         onFocus={() => setOpen(true)}
                         onKeyDown={e => {
+                            const total = filtered.length + (canCreate ? 1 : 0)
                             if (e.key === 'Escape') { setOpen(false); setInputValue('') }
-                            else if (e.key === 'Enter' && canCreate) { void handleCreate() }
-                            else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
+                            else if (e.key === 'ArrowDown') {
+                                e.preventDefault()
+                                if (total > 0) setFocusedIndex(i => (i + 1) % total)
+                            } else if (e.key === 'ArrowUp') {
+                                e.preventDefault()
+                                if (total > 0) setFocusedIndex(i => (i <= 0 ? total - 1 : i - 1))
+                            } else if (e.key === 'Enter') {
+                                if (focusedIndex >= 0 && focusedIndex < filtered.length) {
+                                    e.preventDefault()
+                                    toggleItem(filtered[focusedIndex])
+                                } else if (canCreate) {
+                                    void handleCreate()
+                                }
+                            } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
                                 onChange(value.slice(0, -1))
                             }
                         }}
@@ -178,14 +199,15 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
             >
                 <Paper elevation={3}>
                     <div ref={dropdownRef} className={styles.listbox}>
-                        {filtered.map(option => {
+                        {filtered.map((option, i) => {
                             const selected = selectedIds.has(option.id)
                             const editable = canEdit?.(option) ?? false
                             const colorEntry = value.find(v => v.item.id === option.id)
                             return (
                                 <div
                                     key={option.id}
-                                    className={styles.option}
+                                    data-idx={i}
+                                    className={`${styles.option}${focusedIndex === i ? ` ${styles.optionFocused}` : ''}`}
                                     onMouseDown={e => { e.preventDefault(); toggleItem(option) }}
                                 >
                                     <Checkbox checked={selected} size='small' style={{marginRight: 4, padding: 0}}/>
@@ -233,7 +255,8 @@ export function ColoredMultiSelect<T extends {id: number; name: string; color?: 
                         })}
                         {canCreate && (
                             <div
-                                className={`${styles.option} ${styles.createOption}`}
+                                data-idx={filtered.length}
+                                className={[styles.option, styles.createOption, focusedIndex === filtered.length ? styles.optionFocused : ''].filter(Boolean).join(' ')}
                                 onMouseDown={e => { e.preventDefault(); void handleCreate() }}
                             >
                                 {`Add "${inputValue.trim()}"`}

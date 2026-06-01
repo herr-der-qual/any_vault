@@ -97,6 +97,10 @@
     }
 }
 
+.optionFocused {
+    background: rgba(0, 0, 0, 0.08);
+}
+
 .createOption {
     color: rgba(0, 0, 0, 0.6);
     font-style: italic;
