@@ -1,0 +1,144 @@
+.wrapper {
+    position: relative;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 7px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.23);
+    border-radius: 4px;
+    cursor: text;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &:hover:not(.containerFocused) {
+        border-color: rgba(0, 0, 0, 0.87);
+    }
+
+    &.containerFocused {
+        border: 2px solid #1976d2;
+        padding: 6px 11px;
+    }
+}
+
+.label {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    transform: translateY(-50%);
+    transform-origin: left center;
+    font-size: 1rem;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    background: white;
+    padding: 0 2px;
+    transition: top 0.2s, left 0.2s, transform 0.2s;
+    white-space: nowrap;
+
+    &.labelFloated {
+        top: 0;
+        left: 10px;
+        transform: translateY(-50%) scale(0.75);
+    }
+
+    &.labelActive {
+        color: #1976d2;
+    }
+}
+
+.inner {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
+}
+
+.input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+    font-family: inherit;
+    line-height: 1.4375em;
+    color: rgba(0, 0, 0, 0.87);
+    background: transparent;
+    cursor: text;
+    height: 24px;
+}
+
+.clearBtn {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.38);
+    flex-shrink: 0;
+
+    &:hover {
+        color: rgba(0, 0, 0, 0.6);
+    }
+}
+
+.listbox {
+    padding: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    min-height: 36px;
+    box-sizing: border-box;
+    user-select: none;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.04);
+    }
+}
+
+.optionFocused {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.optionSelected {
+    font-weight: 500;
+}
+
+.optionName {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.optionEditBtn {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 2px !important;
+    color: #9e9e9e;
+
+    &:hover {
+        color: #424242;
+    }
+}
+
+.createOption {
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+}
+
+.noOptions {
+    padding: 8px 16px;
+    color: rgba(0, 0, 0, 0.38);
+    font-size: 0.875rem;
+    text-align: center;
+}

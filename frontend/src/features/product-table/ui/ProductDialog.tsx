@@ -1,14 +1,14 @@
 import {useState, useEffect} from 'react'
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
-    Button, TextField, Typography, Divider, Autocomplete,
+    Button, TextField, Typography, Divider,
     CircularProgress, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox,
 } from '@mui/material'
-import {createFilterOptions} from '@mui/material'
 import {useAuthenticationStore} from '@/app/store/authenticationStore'
 import {getMyGroups, getGroupMembers} from '@/app/api/groups'
-import {getCategories, createCategory, type Category} from '@/app/api/categories'
-import {getBrands, createBrand, type Brand} from '@/app/api/brands'
+import {getCategories, createCategory, renameCategory, deleteCategory, type Category} from '@/app/api/categories'
+import {getBrands, createBrand, renameBrand, deleteBrand, type Brand} from '@/app/api/brands'
+import {CatalogSelect} from '@/shared/ui/CatalogSelect'
 import {getFlavors, createFlavor, renameFlavor, deleteFlavor, updateFlavorColor, type Flavor} from '@/app/api/flavors'
 import {getColors, type Color} from '@/app/api/colors'
 import {createProductBulk, updateProduct, rateProduct, commentProduct, type ProductRow} from '@/app/api/products'
@@ -16,13 +16,9 @@ import type {Group} from '@/entities/group'
 import {RatingPicker} from '@/shared/ui/RatingPicker'
 import {ColoredMultiSelect, type ColoredOption} from '@/shared/ui/ColoredMultiSelect'
 import {FlavorEditDialog} from './FlavorEditDialog'
+import {CatalogItemEditDialog} from './CatalogItemEditDialog'
 import styles from './ProductDialog.module.scss'
 
-type CreatableCategory = Category & {inputValue?: string}
-type CreatableBrand = Brand & {inputValue?: string}
-
-const categoryFilter = createFilterOptions<CreatableCategory>()
-const brandFilter = createFilterOptions<CreatableBrand>()
 
 type Props =
     | {
@@ -74,6 +70,12 @@ export function ProductDialog(props: Props) {
     const [othersRatings, setOthersRatings] = useState<Record<number, number | null>>({})
     const [othersComments, setOthersComments] = useState<Record<number, string>>({})
     const [editingFlavor, setEditingFlavor] = useState<{flavor: Flavor; position: {top: number; left: number}} | null>(null)
+    const [editingBrand, setEditingBrand] = useState<{brand: Brand; position: {top: number; left: number}} | null>(null)
+    const [editingCategory, setEditingCategory] = useState<{category: Category; position: {top: number; left: number}} | null>(null)
+
+    const canEditCatalog = props.mode === 'edit'
+        ? props.canEditOthers
+        : groups.find(g => g.id === (typeof selectedGroupId === 'number' ? selectedGroupId : -1))?.role !== 'view_only'
 
     const productId = props.mode === 'edit' ? props.product.id : null
 
@@ -327,72 +329,34 @@ export function ProductDialog(props: Props) {
                             Product
                         </Typography>
                         <div className={styles.fields}>
-                            <Autocomplete<CreatableCategory>
+                            <CatalogSelect<Category>
                                 options={categories}
                                 value={category}
-                                getOptionLabel={o => o.inputValue ? `Add "${o.inputValue}"` : o.name}
-                                filterOptions={(opts, params) => {
-                                    const filtered = categoryFilter(opts, params)
-                                    if (params.inputValue && !opts.some(o => o.name.toLowerCase() === params.inputValue.toLowerCase())) {
-                                        filtered.push({id: -1, name: params.inputValue, inputValue: params.inputValue})
-                                    }
-                                    return filtered
+                                onChange={setCategory}
+                                onCreate={async name => {
+                                    const c = await createCategory(name, activeGroupId)
+                                    setCategories(p => [...p, c])
+                                    return c
                                 }}
-                                onChange={(_, v) => {
-                                    if (!v) { setCategory(null); return }
-                                    if (v.inputValue) {
-                                        createCategory(v.inputValue, activeGroupId).then(c => {
-                                            setCategories(p => [...p, c])
-                                            setCategory(c)
-                                        })
-                                    } else {
-                                        setCategory(v)
-                                    }
-                                }}
-                                selectOnFocus
-                                clearOnBlur
-                                handleHomeEndKeys
-                                renderInput={params => (
-                                    <TextField
-                                        {...params}
-                                        label='Category'
-                                        size='small'
-                                        required={props.mode === 'create'}
-                                    />
-                                )}
+                                canEdit={c => canEditCatalog && c.group_id !== null}
+                                onEditClick={(c, position) => setEditingCategory({category: c, position})}
+                                keepOpen={editingCategory !== null}
+                                label='Category'
+                                required={props.mode === 'create'}
                             />
-                            <Autocomplete<CreatableBrand>
+                            <CatalogSelect<Brand>
                                 options={brands}
                                 value={brand}
-                                getOptionLabel={o => o.inputValue ? `Add "${o.inputValue}"` : o.name}
-                                filterOptions={(opts, params) => {
-                                    const filtered = brandFilter(opts, params)
-                                    if (params.inputValue && !opts.some(o => o.name.toLowerCase() === params.inputValue.toLowerCase())) {
-                                        filtered.push({id: -1, name: params.inputValue, inputValue: params.inputValue})
-                                    }
-                                    return filtered
+                                onChange={setBrand}
+                                onCreate={async name => {
+                                    const b = await createBrand(name, activeGroupId)
+                                    setBrands(p => [...p, b])
+                                    return b
                                 }}
-                                onChange={(_, v) => {
-                                    if (!v) { setBrand(null); return }
-                                    if (v.inputValue) {
-                                        createBrand(v.inputValue, activeGroupId).then(b => {
-                                            setBrands(p => [...p, b])
-                                            setBrand(b)
-                                        })
-                                    } else {
-                                        setBrand(v)
-                                    }
-                                }}
-                                selectOnFocus
-                                clearOnBlur
-                                handleHomeEndKeys
-                                renderInput={params => (
-                                    <TextField
-                                        {...params}
-                                        label='Brand'
-                                        size='small'
-                                    />
-                                )}
+                                canEdit={b => canEditCatalog && b.group_id !== null}
+                                onEditClick={(b, position) => setEditingBrand({brand: b, position})}
+                                keepOpen={editingBrand !== null}
+                                label='Brand'
                             />
                             <TextField
                                 label='Variant'
@@ -561,6 +525,44 @@ export function ProductDialog(props: Props) {
                 onDelete={handleFlavorDelete}
             />
         )}
+
+        <CatalogItemEditDialog
+            position={editingCategory?.position ?? null}
+            name={editingCategory?.category.name ?? ''}
+            onClose={() => setEditingCategory(null)}
+            onSave={async name => {
+                if (!editingCategory) return
+                await renameCategory(editingCategory.category.id, name)
+                setCategories(prev => prev.map(c => c.id === editingCategory.category.id ? {...c, name} : c))
+                if (category?.id === editingCategory.category.id) setCategory(prev => prev ? {...prev, name} : prev)
+                setEditingCategory(null)
+            }}
+            onDelete={async () => {
+                if (!editingCategory) return
+                await deleteCategory(editingCategory.category.id)
+                setCategories(prev => prev.filter(c => c.id !== editingCategory.category.id))
+                if (category?.id === editingCategory.category.id) setCategory(null)
+            }}
+        />
+
+        <CatalogItemEditDialog
+            position={editingBrand?.position ?? null}
+            name={editingBrand?.brand.name ?? ''}
+            onClose={() => setEditingBrand(null)}
+            onSave={async name => {
+                if (!editingBrand) return
+                await renameBrand(editingBrand.brand.id, name)
+                setBrands(prev => prev.map(b => b.id === editingBrand.brand.id ? {...b, name} : b))
+                if (brand?.id === editingBrand.brand.id) setBrand(prev => prev ? {...prev, name} : prev)
+                setEditingBrand(null)
+            }}
+            onDelete={async () => {
+                if (!editingBrand) return
+                await deleteBrand(editingBrand.brand.id)
+                setBrands(prev => prev.filter(b => b.id !== editingBrand.brand.id))
+                if (brand?.id === editingBrand.brand.id) setBrand(null)
+            }}
+        />
         </>
     )
 }

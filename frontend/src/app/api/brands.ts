@@ -13,3 +13,11 @@ export function getBrands() {
 export function createBrand(name: string, groupId: number | null) {
     return apiClient.post<Brand>('/brands/', {name, group_id: groupId})
 }
+
+export function renameBrand(id: number, name: string) {
+    return apiClient.patch<Brand>(`/brands/${id}/`, {name})
+}
+
+export function deleteBrand(id: number) {
+    return apiClient.delete<void>(`/brands/${id}/`)
+}

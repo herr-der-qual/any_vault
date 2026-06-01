@@ -9,7 +9,8 @@ class IsGroupMemberOrReadOnly(permissions.BasePermission):
             return True
         if obj.group is None:
             return False
-        return GroupMembership.objects.filter(user=request.user, group=obj.group).exists()
+        membership = GroupMembership.objects.filter(user=request.user, group=obj.group).first()
+        return membership is not None and membership.can_edit_others_data()
 
 
 class ProductPermission(permissions.BasePermission):
