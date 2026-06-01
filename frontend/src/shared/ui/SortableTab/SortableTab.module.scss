@@ -1,0 +1,29 @@
+.tab {
+    padding: 0 16px;
+    height: 48px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+
+    &:hover {
+        color: rgba(0, 0, 0, 0.87);
+        background: rgba(0, 0, 0, 0.04);
+    }
+}
+
+.tabActive {
+    color: #1976d2;
+    border-bottom-color: #1976d2;
+}
+
+.tabDragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}

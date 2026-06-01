@@ -236,13 +236,23 @@ class TableViewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         group_id = self.request.query_params.get('group_id')
-        queryset = TableView.objects.filter(group__members=self.request.user)
+        queryset = TableView.objects.filter(group__members=self.request.user).order_by('order', 'created_at')
         if group_id:
             queryset = queryset.filter(group_id=group_id)
         return queryset
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+    @action(detail=False, methods=['post'])
+    def reorder(self, request):
+        ids = request.data.get('ids', [])
+        views = {v.id: v for v in TableView.objects.filter(id__in=ids, group__members=request.user)}
+        for order, view_id in enumerate(ids):
+            if view_id in views:
+                views[view_id].order = order
+        TableView.objects.bulk_update(list(views.values()), ['order'])
+        return Response(status=204)
 
 
 class RatingViewSet(viewsets.ModelViewSet):

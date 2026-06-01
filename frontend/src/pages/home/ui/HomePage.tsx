@@ -1,17 +1,24 @@
 import {useState, useEffect} from 'react'
 import {
-    Tabs, Tab, IconButton, Typography,
+    IconButton, Typography,
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, Select, MenuItem, FormControl, InputLabel,
 } from '@mui/material'
 import {Add as AddIcon} from '@mui/icons-material'
+import {
+    DndContext, PointerSensor, useSensor, useSensors, closestCenter,
+    type DragEndEvent,
+} from '@dnd-kit/core'
+import {SortableContext, horizontalListSortingStrategy, arrayMove} from '@dnd-kit/sortable'
 import {TipButton} from '@/shared/ui/TipButton'
+import {SortableTab} from '@/shared/ui/SortableTab'
 import {getMyGroups} from '@/app/api/groups'
-import {getTableViews, createTableView, deleteTableView} from '@/app/api/tableViews'
+import {getTableViews, createTableView, deleteTableView, reorderTableViews} from '@/app/api/tableViews'
 import type {TableView, TableViewConfig} from '@/app/api/tableViews'
 import type {Group} from '@/entities/group'
 import {ProductTable, DEFAULT_VIEW_CONFIG} from '@/features/product-table'
 import styles from './HomePage.module.scss'
+
 
 export function HomePage() {
     const [views, setViews] = useState<TableView[]>([])
@@ -59,26 +66,40 @@ export function HomePage() {
         setViews(prev => prev.map(v => v.id === updated.id ? updated : v))
     }
 
+    const sensors = useSensors(
+        useSensor(PointerSensor, {activationConstraint: {distance: 5}}),
+    )
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const {active, over} = event
+        if (!over || active.id === over.id) return
+        const oldIndex = views.findIndex(v => v.id === active.id)
+        const newIndex = views.findIndex(v => v.id === over.id)
+        const reordered = arrayMove(views, oldIndex, newIndex)
+        setViews(reordered)
+        void reorderTableViews(reordered.map(v => v.id))
+    }
+
     const activeView = views.find(v => v.id === activeViewId) ?? null
 
     return (
         <div className={styles.page}>
             <div className={styles.tabBar}>
-                <Tabs
-                    value={activeViewId ?? false}
-                    onChange={(_, id) => setActiveViewId(id)}
-                    variant='scrollable'
-                    scrollButtons='auto'
-                    className={styles.tabs}
-                >
-                    {views.map(v => (
-                        <Tab
-                            key={v.id}
-                            value={v.id}
-                            label={v.name}
-                        />
-                    ))}
-                </Tabs>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={views.map(v => v.id)} strategy={horizontalListSortingStrategy}>
+                        <div className={styles.tabList}>
+                            {views.map(v => (
+                                <SortableTab
+                                    key={v.id}
+                                    id={v.id}
+                                    label={v.name}
+                                    active={v.id === activeViewId}
+                                    onSelect={() => setActiveViewId(v.id)}
+                                />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </DndContext>
                 <IconButton
                     size='small'
                     onClick={() => setCreateOpen(true)}

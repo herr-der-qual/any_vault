@@ -12,6 +12,7 @@ export interface TableView {
     group: number
     config: TableViewConfig
     is_default: boolean
+    order: number
     created_at: string
     updated_at: string
 }
@@ -30,4 +31,8 @@ export function updateTableView(id: number, data: Partial<{name: string; config:
 
 export function deleteTableView(id: number) {
     return apiClient.delete(`/table-views/${id}/`)
+}
+
+export function reorderTableViews(ids: number[]) {
+    return apiClient.post<void>('/table-views/reorder/', {ids})
 }

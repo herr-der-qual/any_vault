@@ -22,9 +22,14 @@
     overflow: hidden;
 }
 
-.tabs {
+.tabList {
+    display: flex;
     flex: 1;
     min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
 }
 
 .emptyState {
