@@ -31,9 +31,10 @@ class UserGroup(models.Model):
 
 class GroupMembership(models.Model):
     ROLE_CHOICES = (
-        ('admin', 'Admin'),          # Can edit roles and others data
-        ('moderator', 'Moderator'),  # Can edit others data
-        ('view_only', 'View Only'),  # Can edit only their own data
+        ('admin', 'Admin'),          # Full control: everything
+        ('moderator', 'Moderator'),  # Edit ratings in group + manage roles (except admin)
+        ('editor', 'Editor'),        # Edit ratings in group only
+        ('view_only', 'View Only'),  # Read only, can edit only their own ratings/comments
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='memberships')
@@ -51,7 +52,7 @@ class GroupMembership(models.Model):
         return f"{self.user.email} - {self.group.name} ({self.role})"
 
     def can_edit_roles(self):
-        return self.role == 'admin'
+        return self.role in ('admin', 'moderator')
 
     def can_edit_user_data(self, target_user):
         if self.user == target_user:
@@ -59,7 +60,7 @@ class GroupMembership(models.Model):
         return self.can_edit_others_data()
 
     def can_edit_others_data(self):
-        return self.role in ['admin', 'moderator']
+        return self.role in ('admin', 'moderator', 'editor')
 
     def can_manage_group(self):
         return self.role == 'admin'

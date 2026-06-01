@@ -173,7 +173,7 @@ export function ProductTable({view, groups, onViewUpdated, onViewDeleted}: Props
 
     const canEditOthers = useMemo(() => {
         const role = groups.find(g => g.id === view.group)?.role
-        return role === 'admin' || role === 'moderator'
+        return role === 'admin' || role === 'moderator' || role === 'editor'
     }, [groups, view.group])
 
     const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

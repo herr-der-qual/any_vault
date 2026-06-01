@@ -1,7 +1,7 @@
 export interface Group {
     id: number
     name: string
-    role: 'admin' | 'moderator' | 'view_only'
+    role: 'admin' | 'moderator' | 'editor' | 'view_only'
 }
 
 export interface GroupMember {

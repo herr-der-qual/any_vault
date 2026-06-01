@@ -12,10 +12,11 @@ import styles from './SettingsPage.module.scss'
 const ROLE_LABELS: Record<string, string> = {
     admin: 'Admin',
     moderator: 'Moderator',
+    editor: 'Editor',
     view_only: 'View only',
 }
 
-const ROLE_OPTIONS = ['admin', 'moderator', 'view_only'] as const
+const ROLE_OPTIONS = ['moderator', 'editor', 'view_only'] as const
 
 export function SettingsPage() {
     const user = useAuthenticationStore(state => state.user)
@@ -99,7 +100,7 @@ export function SettingsPage() {
                             {(members[group.id] ?? []).map(member => (
                                 <div key={member.user_id} className={styles.memberRow}>
                                     <Typography variant='body2'>{member.email}</Typography>
-                                    {group.role === 'admin' && member.user_id !== user?.id ? (
+                                    {(group.role === 'admin' || group.role === 'moderator') && member.user_id !== user?.id && member.role !== 'admin' ? (
                                         <Select
                                             value={member.role}
                                             size='small'

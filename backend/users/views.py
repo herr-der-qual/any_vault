@@ -69,6 +69,16 @@ class GroupAdminPermission(BasePermission):
             return False
 
 
+class GroupModeratorPermission(BasePermission):
+    def has_permission(self, request, view):
+        group_id = view.kwargs.get('group_id')
+        try:
+            membership = GroupMembership.objects.get(user=request.user, group_id=group_id)
+            return membership.can_edit_roles()
+        except GroupMembership.DoesNotExist:
+            return False
+
+
 class GroupMembersView(APIView):
     permission_classes = [IsAuthenticated, GroupMemberPermission]
 
@@ -86,13 +96,16 @@ class GroupMembersView(APIView):
 
 
 class GroupMemberRoleView(APIView):
-    permission_classes = [IsAuthenticated, GroupAdminPermission]
+    permission_classes = [IsAuthenticated, GroupModeratorPermission]
 
     def patch(self, request, group_id, user_id):
         membership = get_object_or_404(GroupMembership, group_id=group_id, user_id=user_id)
         role = request.data.get('role')
         if role not in dict(GroupMembership.ROLE_CHOICES):
             return Response({'role': ['Invalid role.']}, status=400)
+        requester = GroupMembership.objects.get(user=request.user, group_id=group_id)
+        if requester.role == 'moderator' and (role == 'admin' or membership.role == 'admin'):
+            return Response({'detail': 'Moderators cannot assign or modify admin roles.'}, status=403)
         membership.role = role
         membership.save(update_fields=['role'])
         return Response({'user_id': user_id, 'role': role})
