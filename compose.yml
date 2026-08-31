@@ -40,38 +40,19 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
+    ports:
+      - "127.0.0.1:8000:8000"
     volumes:
-      - static_files:/app/staticfiles
-      - media_files:/app/media
+      - /var/www/any-vault/static:/app/staticfiles
+      - /var/www/any-vault/media:/app/media
     depends_on:
       database:
         condition: service_healthy
     networks:
       - anyvault_network
 
-  nginx:
-    image: nginx:alpine
-    container_name: anyvault_nginx
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt/live/any-vault.ru/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
-      - /etc/letsencrypt/live/any-vault.ru/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
-      - static_files:/static:ro
-      - media_files:/media:ro
-      - ./frontend/dist:/usr/share/nginx/html:ro
-    depends_on:
-      - backend
-    networks:
-      - anyvault_network
-
 volumes:
   postgres_data:
-  static_files:
-  media_files:
 
 networks:
   anyvault_network:
